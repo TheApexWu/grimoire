@@ -32,7 +32,7 @@ type WorkshopInput = CoachInput | GenerateInput;
 export async function POST(request: Request) {
   const body = (await request.json()) as WorkshopInput;
   const mode: Mode = body.mode || "coach";
-  const rounds = body.rounds || 3;
+  const rounds = body.rounds || 5;
 
   if (mode === "coach") {
     const { userText, targetSample, targetFingerprint } = body as CoachInput;

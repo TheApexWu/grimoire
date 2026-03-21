@@ -19,6 +19,8 @@ interface VoiceShapeProps {
   scale?: number;
   /** Label shown below */
   label?: string;
+  /** Icosahedron detail level (2=fast, 3=default, 4=hq) */
+  detail?: number;
 }
 
 function DeformedSphere({
@@ -27,15 +29,17 @@ function DeformedSphere({
   opacity = 0.7,
   wireframe = false,
   rotateSpeed = 0.3,
+  detail = 3,
 }: {
   values: number[];
   color?: string;
   opacity?: number;
   wireframe?: boolean;
   rotateSpeed?: number;
+  detail?: number;
 }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const baseGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
+  const baseGeo = useMemo(() => new THREE.IcosahedronGeometry(1, detail), [detail]);
 
   const geometry = useMemo(() => {
     const geo = baseGeo.clone();
@@ -79,9 +83,10 @@ function DeformedSphere({
     return geo;
   }, [baseGeo, values]);
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     if (meshRef.current && rotateSpeed > 0) {
       meshRef.current.rotation.y += delta * rotateSpeed;
+      state.invalidate();
     }
   });
 
@@ -115,6 +120,7 @@ export default function VoiceShape({
   rotateSpeed = 0.3,
   scale = 1,
   label,
+  detail = 3,
 }: VoiceShapeProps) {
   // Ensure we have at least some values
   const safeValues = values.length > 0 ? values : [0.5, 0.5, 0.5, 0.5, 0.5];
@@ -122,9 +128,10 @@ export default function VoiceShape({
   return (
     <div className="relative w-full" style={{ aspectRatio: "1" }}>
       <Canvas
-        camera={{ position: [0, 0, 3.5], fov: 45 }}
+        camera={{ position: [0, 0, 2.8], fov: 50 }}
         style={{ background: "transparent" }}
         dpr={[1, 1.5]}
+        frameloop="demand"
         gl={{ alpha: true, antialias: true, powerPreference: "low-power" }}
       >
         <ambientLight intensity={0.4} />
@@ -141,6 +148,7 @@ export default function VoiceShape({
               wireframe
               opacity={0.4}
               rotateSpeed={rotateSpeed}
+              detail={detail}
             />
           )}
 
@@ -150,6 +158,7 @@ export default function VoiceShape({
             color={color}
             opacity={0.75}
             rotateSpeed={rotateSpeed}
+            detail={detail}
           />
         </group>
 
@@ -158,6 +167,7 @@ export default function VoiceShape({
           enablePan={false}
           autoRotate={false}
           dampingFactor={0.05}
+          makeDefault
         />
       </Canvas>
 

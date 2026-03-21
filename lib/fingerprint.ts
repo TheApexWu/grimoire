@@ -136,34 +136,36 @@ export function compareFingerprints(
 export function statFingerprintToRadar(
   fp: StatFingerprint
 ): { label: string; value: number }[] {
+  // Ranges tightened to literary prose (not "all possible text")
+  // so differences between authors are visible on radar
   return [
     {
       label: "Monosyllable %",
-      value: clamp01((fp.monosyllableRatio - 0.5) / 0.5),
+      value: clamp01((fp.monosyllableRatio - 0.62) / 0.23),
     },
     {
       label: "Sentence Length",
-      value: clamp01((fp.sentenceMean - 5) / 45),
+      value: clamp01((fp.sentenceMean - 5) / 30),
     },
     {
       label: "Sentence Variation",
-      value: clamp01((fp.sentenceStd - 2) / 28),
+      value: clamp01((fp.sentenceStd - 2) / 22),
     },
     {
       label: "Comma Density",
-      value: clamp01(fp.commaRate / 5),
+      value: clamp01((fp.commaRate - 0.2) / 2.3),
     },
     {
       label: "Semicolons",
-      value: clamp01(fp.semicolonRate / 1),
+      value: clamp01(fp.semicolonRate / 0.4),
     },
     {
       label: "Lexical Diversity",
-      value: clamp01((fp.lexicalDiversity - 0.3) / 0.55),
+      value: clamp01((fp.lexicalDiversity - 0.55) / 0.25),
     },
     {
       label: "Conjunctions",
-      value: clamp01(fp.conjunctionDensity / 3),
+      value: clamp01(fp.conjunctionDensity / 1.8),
     },
   ];
 }

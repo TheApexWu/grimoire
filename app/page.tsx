@@ -17,6 +17,7 @@ import {
 } from "recharts";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { computeUniformityScore, diagnoseWriting } from "@/components/VoiceShape";
+import { statFingerprintToRadar } from "@/lib/fingerprint";
 
 const VoiceShape = lazy(() => import("@/components/VoiceShape"));
 
@@ -163,17 +164,18 @@ export default function Home() {
 
   const loadFromLibrary = useCallback(
     (author: FallbackAuthor, side: "A" | "B") => {
+      const radar = statFingerprintToRadar(author.stats);
       if (side === "A") {
         setTextA(author.sampleText);
         setNameA(author.name);
         setFpA(author.stats);
-        setRadarA(author.radar);
+        setRadarA(radar);
         setVoiceA(author.voice);
       } else {
         setTextB(author.sampleText);
         setNameB(author.name);
         setFpB(author.stats);
-        setRadarB(author.radar);
+        setRadarB(radar);
         setVoiceB(author.voice);
       }
     },
@@ -703,7 +705,7 @@ export default function Home() {
                       setView("compare");
                       // Auto-set fingerprints for comparison
                       setFpB(a.stats);
-                      setRadarB(a.radar);
+                      setRadarB(statFingerprintToRadar(a.stats));
                       setVoiceB(a.voice);
                       setNameB(a.name);
                       setTextB(a.sampleText);
@@ -1029,19 +1031,25 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Convergence line */}
+            {/* Convergence line - running minimum (best-so-far) */}
             <div className="border border-zinc-800 rounded-lg p-6">
               <h3 className="text-sm font-semibold text-zinc-400 mb-4 font-[family-name:var(--font-geist-mono)]">
-                DISTANCE BY ROUND
+                BEST DISTANCE (CUMULATIVE)
               </h3>
               <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={coachResult.convergence}>
+                <LineChart data={(() => {
+                  let min = Infinity;
+                  return coachResult.convergence.map(c => {
+                    min = Math.min(min, c.distance);
+                    return { round: c.round, distance: min, roundBest: c.distance };
+                  });
+                })()}>
                   <CartesianGrid stroke="#222" />
                   <XAxis
                     dataKey="round"
                     tick={{ fill: "#888", fontSize: 12 }}
                   />
-                  <YAxis tick={{ fill: "#888", fontSize: 12 }} />
+                  <YAxis tick={{ fill: "#888", fontSize: 12 }} domain={[0, 'auto']} />
                   <Tooltip
                     contentStyle={{
                       background: "#18181b",
@@ -1055,6 +1063,16 @@ export default function Home() {
                     stroke="#22c55e"
                     strokeWidth={2}
                     dot={{ fill: "#22c55e", r: 4 }}
+                    name="Best so far"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="roundBest"
+                    stroke="#555"
+                    strokeWidth={1}
+                    strokeDasharray="4 4"
+                    dot={{ fill: "#555", r: 3 }}
+                    name="Round best"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -1116,40 +1134,46 @@ export default function Home() {
               </div>
             </div>
 
-            {/* LLM Judge Verdict */}
+            {/* LLM Blind Test */}
             {judgeVerdict && (
-              <div className="border border-zinc-800 rounded-lg p-6">
+              <div className={`border rounded-lg p-6 ${
+                judgeVerdict.sameAuthor ? "border-green-800/60" : "border-zinc-800"
+              }`}>
                 <h3 className="text-sm font-semibold text-zinc-400 mb-3 font-[family-name:var(--font-geist-mono)]">
-                  BLIND JUDGE VERDICT
+                  BLIND AUTHORSHIP TEST
                 </h3>
                 <div className="flex items-center gap-4">
                   <div
-                    className={`text-4xl font-bold font-[family-name:var(--font-geist-mono)] ${
+                    className={`text-3xl font-bold font-[family-name:var(--font-geist-mono)] ${
                       judgeVerdict.sameAuthor
                         ? "text-green-400"
-                        : "text-red-400"
+                        : "text-amber-400"
                     }`}
                   >
-                    {judgeVerdict.sameAuthor ? "PASS" : "FAIL"}
+                    {judgeVerdict.sameAuthor ? "FOOLED" : "DETECTED"}
                   </div>
                   <div className="flex-1">
-                    <div className="text-sm text-zinc-300">
+                    <div className="text-sm text-zinc-300 mb-1">
+                      {judgeVerdict.sameAuthor
+                        ? "The judge could not distinguish the coached output from the target author."
+                        : "The judge identified stylistic differences between the coached output and target."}
+                    </div>
+                    <div className="text-xs text-zinc-500 leading-relaxed">
                       {judgeVerdict.reasoning}
                     </div>
-                    <div className="text-xs text-zinc-600 mt-1 font-[family-name:var(--font-geist-mono)]">
+                    <div className="text-xs text-zinc-600 mt-2 font-[family-name:var(--font-geist-mono)]">
                       Confidence: {(judgeVerdict.confidence * 100).toFixed(0)}%
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-zinc-600 mt-3">
-                  An LLM was shown the coached output and the target sample
-                  without labels, then asked: &quot;same author?&quot;
+                <p className="text-[10px] text-zinc-700 mt-3 font-[family-name:var(--font-geist-mono)]">
+                  A separate LLM was shown both texts unlabeled and asked: &quot;same author?&quot;
                 </p>
               </div>
             )}
             {!judgeVerdict && view === "coached" && (
               <div className="border border-zinc-800 rounded-lg p-4 text-center text-sm text-zinc-600">
-                Running blind judge test...
+                Running blind authorship test...
               </div>
             )}
 

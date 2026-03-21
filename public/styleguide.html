@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grimoire Style Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;700&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=Fira+Code:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Inconsolata:wght@400;700&family=DM+Sans:wght@400;600;700&family=Outfit:wght@400;600;700&family=Syne:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Manrope:wght@400;600;700&family=Instrument+Serif:ital,wght@0,400;1,400&family=Playfair+Display:wght@400;600;700;900&family=Cormorant+Garamond:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Crimson+Pro:wght@400;600;700&family=EB+Garamond:wght@400;600;700&family=Bodoni+Moda:wght@400;600;700;900&family=Fraunces:wght@400;600;700;900&family=Bricolage+Grotesque:wght@400;600;700;800&family=Clash+Display:wght@400;600;700&family=Schibsted+Grotesk:wght@400;600;700&family=Darker+Grotesque:wght@400;600;700;900&family=Hanken+Grotesk:wght@400;600;700&family=Urbanist:wght@400;600;700&family=Azeret+Mono:wght@400;700&family=Martian+Mono:wght@400;700&family=Fragment+Mono&family=Courier+Prime:wght@400;700&family=Victor+Mono:wght@400;700&family=Literata:wght@400;600;700&family=Newsreader:wght@400;600;700&family=Lora:wght@400;600;700&family=Source+Serif+4:wght@400;600;700&family=Spectral:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #09090b;
+  color: #f4f4f5;
+  font-family: 'Inter', sans-serif;
+  padding: 24px;
+}
+
+.controls {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 340px;
+  height: 100vh;
+  background: #111;
+  border-right: 1px solid #333;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.controls h2 {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #888;
+  margin: 20px 0 8px;
+  text-transform: uppercase;
+}
+
+.controls h2:first-child { margin-top: 0; }
+
+.section-label {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #555;
+  text-transform: uppercase;
+  margin: 12px 0 4px;
+  padding-left: 4px;
+}
+
+.font-option {
+  padding: 8px 12px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+}
+
+.font-option:hover { border-color: #666; }
+.font-option.active { border-color: #fff; background: #1a1a1a; }
+
+.font-option .font-meta {
+  font-size: 9px;
+  color: #555;
+  font-family: 'Inter', sans-serif;
+  margin-top: 2px;
+}
+
+.color-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.color-swatch:hover { transform: scale(1.1); }
+.color-swatch.active { border-color: #fff; }
+
+.bg-option {
+  padding: 8px 12px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+
+.bg-option:hover { border-color: #666; }
+.bg-option.active { border-color: #fff; background: #1a1a1a; }
+
+.preview {
+  margin-left: 360px;
+  max-width: 900px;
+}
+
+.preview-card {
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 24px;
+  transition: background 0.3s;
+}
+
+.preview-title {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.preview-subtitle {
+  font-size: 14px;
+  color: #71717a;
+  margin-bottom: 24px;
+}
+
+.preview-mono {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: #71717a;
+  margin-bottom: 16px;
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.metric-label { width: 120px; color: #71717a; }
+
+.metric-bar {
+  flex: 1;
+  height: 4px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.metric-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+.metric-val { width: 30px; text-align: right; color: #71717a; }
+
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #71717a;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.score {
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.score-label {
+  font-size: 10px;
+  color: #71717a;
+}
+
+.verdict-box {
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.verdict-text { font-size: 28px; font-weight: 700; }
+
+.sample-text {
+  font-size: 13px;
+  color: #a1a1aa;
+  line-height: 1.7;
+  padding: 16px;
+  background: #0a0a0a;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.btn-primary { background: #fff; color: #000; }
+.btn-outline { background: transparent; border: 1px solid #333; color: #a1a1aa; }
+
+.divider { height: 1px; background: #222; margin: 16px 0; }
+
+.size-toggle {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.size-btn {
+  padding: 4px 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: transparent;
+  color: #888;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.size-btn.active { border-color: #fff; color: #fff; }
+
+.weight-toggle {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <h2>Heading Font</h2>
+  <div class="section-label">Editorial / Serif</div>
+  <div id="heading-serif"></div>
+  <div class="section-label">Grotesque / Geometric</div>
+  <div id="heading-grotesk"></div>
+  <div class="section-label">Display / Expressive</div>
+  <div id="heading-display"></div>
+
+  <h2>Mono / UI Font</h2>
+  <div class="section-label">Standard</div>
+  <div id="mono-standard"></div>
+  <div class="section-label">Unusual</div>
+  <div id="mono-unusual"></div>
+
+  <h2>Body Font</h2>
+  <div class="section-label">Serif (editorial)</div>
+  <div id="body-serif"></div>
+  <div class="section-label">Sans-Serif</div>
+  <div id="body-sans"></div>
+
+  <h2>Accent Color</h2>
+  <div class="color-row" id="accent-colors"></div>
+
+  <h2>Background</h2>
+  <div id="bg-options"></div>
+
+  <h2>Title Size</h2>
+  <div class="size-toggle" id="title-sizes"></div>
+
+  <h2>Title Weight</h2>
+  <div class="weight-toggle" id="title-weights"></div>
+
+  <h2>Current Selection</h2>
+  <pre id="selection-output" style="font-size: 11px; color: #22c55e; background: #0a0a0a; padding: 12px; border-radius: 6px; white-space: pre-wrap; margin-top: 8px;"></pre>
+</div>
+
+<div class="preview">
+  <!-- Card 1: Title + Tagline -->
+  <div class="preview-card" id="card-hero">
+    <div class="preview-mono" id="mono-sample">AGENTIC WRITING WORKSHOP</div>
+    <div class="preview-title" id="title-sample">GRIMOIRE</div>
+    <div class="preview-subtitle" id="subtitle-sample">Capture any writing voice. Study it. Channel it.</div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <button class="btn btn-primary" id="btn-primary">DIAGNOSE YOUR VOICE</button>
+      <button class="btn btn-outline">COMPARE TWO AUTHORS</button>
+    </div>
+  </div>
+
+  <!-- Card 2: Author comparison -->
+  <div class="preview-card">
+    <div class="two-col">
+      <div>
+        <div class="preview-mono">SOURCE</div>
+        <div style="font-size: 20px; font-weight: 700;" id="author-name-1">Ernest Hemingway</div>
+        <div style="font-size: 12px; color: #71717a;">Hills Like White Elephants</div>
+        <div style="margin-top: 12px;">
+          <span class="tag" id="tag1">cold detachment</span>
+          <span class="tag" id="tag2">declarative-sparse</span>
+        </div>
+      </div>
+      <div>
+        <div class="preview-mono">TARGET</div>
+        <div style="font-size: 20px; font-weight: 700;" id="author-name-2">Edgar Allan Poe</div>
+        <div style="font-size: 12px; color: #71717a;">The Fall of the House of Usher</div>
+        <div style="margin-top: 12px;">
+          <span class="tag">dread-saturated intensity</span>
+          <span class="tag">gothic-ornate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 3: Metrics -->
+  <div class="preview-card">
+    <div class="preview-mono">VOICE FINGERPRINT</div>
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px;">
+      <div style="font-size: 20px; font-weight: 700;" id="metric-author">Ernest Hemingway</div>
+      <div style="text-align: right;">
+        <div class="score" id="score-display">94</div>
+        <div class="score-label">distinctiveness</div>
+      </div>
+    </div>
+    <div id="metric-bars"></div>
+  </div>
+
+  <!-- Card 4: Verdict -->
+  <div class="preview-card">
+    <div class="preview-mono">BLIND AUTHORSHIP TEST</div>
+    <div class="verdict-box" style="margin-top: 12px;">
+      <div class="verdict-text" id="verdict-label" style="color: #22c55e;">FOOLED</div>
+      <div style="flex: 1;">
+        <div style="font-size: 13px; color: #d4d4d8;">The judge could not distinguish the coached output from the target author.</div>
+        <div style="font-size: 11px; color: #71717a; margin-top: 4px;">Confidence: 72%</div>
+      </div>
+    </div>
+    <div class="verdict-box" style="margin-top: 8px;">
+      <div class="verdict-text" id="verdict-label-2" style="color: #f59e0b;">DETECTED</div>
+      <div style="flex: 1;">
+        <div style="font-size: 13px; color: #d4d4d8;">The judge identified stylistic differences between the coached output and target.</div>
+        <div style="font-size: 11px; color: #71717a; margin-top: 4px;">Confidence: 85%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 5: Sample text -->
+  <div class="preview-card">
+    <div class="preview-mono">COACHED OUTPUT</div>
+    <div class="sample-text" id="sample-display">
+      The hills across the valley of the Ebro were long and white. On this side there was no shade and no trees and the station was between two lines of rails in the sun. Close against the side of the station there was the warm shadow of the building and a curtain, made of strings of bamboo beads, hung across the open door into the bar, to keep out flies.
+    </div>
+  </div>
+
+  <!-- Card 6: Convergence mockup -->
+  <div class="preview-card">
+    <div class="preview-mono">BEST DISTANCE (CUMULATIVE)</div>
+    <div style="display: flex; align-items: flex-end; gap: 4px; height: 80px; padding-top: 8px;">
+      <div style="flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="bar1" style="width: 100%; border-radius: 3px 3px 0 0; transition: all 0.3s;"></div>
+        <span class="preview-mono" style="margin:0;">R1</span>
+      </div>
+      <div style="flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="bar2" style="width: 100%; border-radius: 3px 3px 0 0; transition: all 0.3s;"></div>
+        <span class="preview-mono" style="margin:0;">R2</span>
+      </div>
+      <div style="flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="bar3" style="width: 100%; border-radius: 3px 3px 0 0; transition: all 0.3s;"></div>
+        <span class="preview-mono" style="margin:0;">R3</span>
+      </div>
+      <div style="flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="bar4" style="width: 100%; border-radius: 3px 3px 0 0; transition: all 0.3s;"></div>
+        <span class="preview-mono" style="margin:0;">R4</span>
+      </div>
+      <div style="flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+        <div id="bar5" style="width: 100%; border-radius: 3px 3px 0 0; transition: all 0.3s;"></div>
+        <span class="preview-mono" style="margin:0;">R5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 7: Tech footer -->
+  <div class="preview-card" style="text-align: center;">
+    <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;">
+      <span class="tag">Next.js 16</span>
+      <span class="tag">Vercel AI SDK</span>
+      <span class="tag">Gemini 3.1 Pro</span>
+      <span class="tag">Three.js</span>
+      <span class="tag">Supabase</span>
+      <span class="tag">ElevenLabs</span>
+    </div>
+    <div class="preview-mono">GRIMOIRE / Zero to Agent 2026</div>
+  </div>
+</div>
+
+<script>
+// --- HEADING FONTS ---
+const headingSerif = [
+  { name: 'Instrument Serif', css: "'Instrument Serif', serif", meta: 'Google, 2023. Refined transitional serif.' },
+  { name: 'Playfair Display', css: "'Playfair Display', serif", meta: 'High contrast didone. Magazine editorial.' },
+  { name: 'Bodoni Moda', css: "'Bodoni Moda', serif", meta: 'Variable Bodoni revival. Ultra-thin hairlines.' },
+  { name: 'Cormorant Garamond', css: "'Cormorant Garamond', serif", meta: 'Delicate Garamond. Elegant at large sizes.' },
+  { name: 'Fraunces', css: "'Fraunces', serif", meta: 'Wonky old-style. Expressive optical axis.' },
+  { name: 'EB Garamond', css: "'EB Garamond', serif", meta: 'Claude Garamond revival. Classic humanist.' },
+];
+
+const headingGrotesk = [
+  { name: 'Space Grotesk', css: "'Space Grotesk', sans-serif", meta: 'Geometric monospace heritage. Technical.' },
+  { name: 'Bricolage Grotesque', css: "'Bricolage Grotesque', sans-serif", meta: 'Variable width axis. Brutalist energy.' },
+  { name: 'Schibsted Grotesk', css: "'Schibsted Grotesk', sans-serif", meta: 'Norwegian news grotesk. Sharp terminals.' },
+  { name: 'Darker Grotesque', css: "'Darker Grotesque', sans-serif", meta: 'Ultra-condensed capable. Dramatic weight range.' },
+  { name: 'Hanken Grotesk', css: "'Hanken Grotesk', sans-serif", meta: 'Clean geometric. Neutral but distinctive.' },
+  { name: 'Urbanist', css: "'Urbanist', sans-serif", meta: 'Geometric with humanist touches. Modern.' },
+];
+
+const headingDisplay = [
+  { name: 'Syne', css: "'Syne', sans-serif", meta: 'Art direction typeface. Synesthesia project.' },
+  { name: 'Outfit', css: "'Outfit', sans-serif", meta: 'Geometric variable. Clean and contemporary.' },
+  { name: 'Inter', css: "'Inter', sans-serif", meta: 'Rasmus Andersson. The default default.' },
+  { name: 'Manrope', css: "'Manrope', sans-serif", meta: 'Semi-rounded grotesque. Friendly technical.' },
+];
+
+// --- MONO FONTS ---
+const monoStandard = [
+  { name: 'Geist Mono', css: "'Geist Mono', monospace", meta: 'Vercel. Designed for code + UI.' },
+  { name: 'JetBrains Mono', css: "'JetBrains Mono', monospace", meta: 'IDE native. Ligatures + tall x-height.' },
+  { name: 'IBM Plex Mono', css: "'IBM Plex Mono', monospace", meta: 'IBM Carbon system. Corporate-clean.' },
+  { name: 'Fira Code', css: "'Fira Code', monospace", meta: 'Mozilla heritage. Heavy ligature support.' },
+];
+
+const monoUnusual = [
+  { name: 'Space Mono', css: "'Space Mono', monospace", meta: 'Colophon. Geometric mono. Editorial flavor.' },
+  { name: 'Azeret Mono', css: "'Azeret Mono', monospace", meta: 'Sharp, technical, brutalist mono.' },
+  { name: 'Martian Mono', css: "'Martian Mono', monospace", meta: 'Semi-condensed. Futuristic feel.' },
+  { name: 'Fragment Mono', css: "'Fragment Mono', monospace", meta: 'Grilli Type. Swiss precision.' },
+  { name: 'Courier Prime', css: "'Courier Prime', monospace", meta: 'Screenplay standard. Typewriter nostalgia.' },
+  { name: 'Victor Mono', css: "'Victor Mono', monospace", meta: 'Cursive italics. Playful mono.' },
+  { name: 'Inconsolata', css: "'Inconsolata', monospace", meta: 'Raph Levien. Humanist mono classic.' },
+  { name: 'Source Code Pro', css: "'Source Code Pro', monospace", meta: 'Adobe. Neutral workhorse.' },
+];
+
+// --- BODY FONTS ---
+const bodySerif = [
+  { name: 'Literata', css: "'Literata', serif", meta: 'Google Books typeface. Optimized for reading.' },
+  { name: 'Newsreader', css: "'Newsreader', serif", meta: 'Production Type. Long-form editorial.' },
+  { name: 'Lora', css: "'Lora', serif", meta: 'Calligraphic serif. Warm and readable.' },
+  { name: 'Source Serif 4', css: "'Source Serif 4', serif", meta: 'Adobe. Transitional workhorse.' },
+  { name: 'Spectral', css: "'Spectral', serif", meta: 'Production Type. Screen-first serif.' },
+  { name: 'Libre Baskerville', css: "'Libre Baskerville', serif", meta: 'Baskerville for screens. High readability.' },
+  { name: 'Crimson Pro', css: "'Crimson Pro', serif", meta: 'Old-style serif. Scholarly elegance.' },
+];
+
+const bodySans = [
+  { name: 'Inter', css: "'Inter', sans-serif", meta: 'Default. Works everywhere.' },
+  { name: 'DM Sans', css: "'DM Sans', sans-serif", meta: 'Geometric sans. Clean and low-profile.' },
+  { name: 'Plus Jakarta Sans', css: "'Plus Jakarta Sans', sans-serif", meta: 'Tokotype. Modern geometric.' },
+  { name: 'Manrope', css: "'Manrope', sans-serif", meta: 'Semi-rounded. Approachable tech.' },
+  { name: 'System UI', css: "system-ui, -apple-system, sans-serif", meta: 'OS native. Zero load time.' },
+];
+
+// --- COLORS ---
+const accentColors = [
+  { name: 'Green', hex: '#22c55e' },
+  { name: 'Amber', hex: '#f59e0b' },
+  { name: 'Blue', hex: '#3b82f6' },
+  { name: 'Purple', hex: '#8b5cf6' },
+  { name: 'Red', hex: '#ef4444' },
+  { name: 'Pink', hex: '#ec4899' },
+  { name: 'Cyan', hex: '#06b6d4' },
+  { name: 'Rose', hex: '#f43f5e' },
+  { name: 'Lime', hex: '#84cc16' },
+  { name: 'Teal', hex: '#14b8a6' },
+  { name: 'Indigo', hex: '#6366f1' },
+  { name: 'White', hex: '#ffffff' },
+  { name: 'Zinc', hex: '#a1a1aa' },
+];
+
+const bgOptions = [
+  { name: 'Pure Black', bg: '#000000', card: '#09090b' },
+  { name: 'Zinc 950', bg: '#09090b', card: '#111' },
+  { name: 'Neutral 950', bg: '#0a0a0a', card: '#141414' },
+  { name: 'Slate 950', bg: '#020617', card: '#0f172a' },
+  { name: 'Stone 950', bg: '#0c0a09', card: '#1c1917' },
+  { name: 'Ink', bg: '#0b0c10', card: '#12131a' },
+  { name: 'Deep Navy', bg: '#030712', card: '#0d1117' },
+];
+
+const titleSizes = [
+  { name: 'S', size: '28px' },
+  { name: 'M', size: '36px' },
+  { name: 'L', size: '42px' },
+  { name: 'XL', size: '52px' },
+  { name: 'XXL', size: '64px' },
+];
+
+const titleWeights = [
+  { name: '400', weight: '400' },
+  { name: '600', weight: '600' },
+  { name: '700', weight: '700' },
+  { name: '900', weight: '900' },
+];
+
+const metrics = [
+  { label: 'Monosyllable %', value: 94 },
+  { label: 'Sentence Length', value: 6 },
+  { label: 'Sentence Variation', value: 7 },
+  { label: 'Comma Density', value: 9 },
+  { label: 'Semicolons', value: 0 },
+  { label: 'Lexical Diversity', value: 30 },
+  { label: 'Conjunctions', value: 9 },
+];
+
+// --- STATE ---
+let state = {
+  headingFont: headingSerif[0],
+  monoFont: monoStandard[0],
+  bodyFont: bodySans[0],
+  accent: accentColors[0],
+  bg: bgOptions[1],
+  titleSize: titleSizes[2],
+  titleWeight: titleWeights[2],
+};
+
+// --- RENDERING ---
+function fontHtml(fonts, category) {
+  return fonts.map((f, i) =>
+    `<div class="font-option ${f.name === state[category].name ? 'active' : ''}"
+          style="font-family: ${f.css}"
+          onclick="setFont('${category}', '${f.name}')">
+      ${f.name}
+      <div class="font-meta">${f.meta || ''}</div>
+    </div>`
+  ).join('');
+}
+
+function setFont(category, name) {
+  const allFonts = {
+    headingFont: [...headingSerif, ...headingGrotesk, ...headingDisplay],
+    monoFont: [...monoStandard, ...monoUnusual],
+    bodyFont: [...bodySerif, ...bodySans],
+  };
+  state[category] = allFonts[category].find(f => f.name === name);
+  render();
+}
+
+function render() {
+  // Heading fonts
+  document.getElementById('heading-serif').innerHTML = fontHtml(headingSerif, 'headingFont');
+  document.getElementById('heading-grotesk').innerHTML = fontHtml(headingGrotesk, 'headingFont');
+  document.getElementById('heading-display').innerHTML = fontHtml(headingDisplay, 'headingFont');
+
+  // Mono fonts
+  document.getElementById('mono-standard').innerHTML = fontHtml(monoStandard, 'monoFont');
+  document.getElementById('mono-unusual').innerHTML = fontHtml(monoUnusual, 'monoFont');
+
+  // Body fonts
+  document.getElementById('body-serif').innerHTML = fontHtml(bodySerif, 'bodyFont');
+  document.getElementById('body-sans').innerHTML = fontHtml(bodySans, 'bodyFont');
+
+  // Accent colors
+  const ac = document.getElementById('accent-colors');
+  ac.innerHTML = accentColors.map((c, i) =>
+    `<div class="color-swatch ${c.hex === state.accent.hex ? 'active' : ''}"
+          style="background: ${c.hex}"
+          title="${c.name}"
+          onclick="setState('accent', ${i})"></div>`
+  ).join('');
+
+  // BG options
+  const bo = document.getElementById('bg-options');
+  bo.innerHTML = bgOptions.map((b, i) =>
+    `<div class="bg-option ${b.name === state.bg.name ? 'active' : ''}"
+          onclick="setState('bg', ${i})">
+      <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${b.bg};border:1px solid #444;margin-right:6px;vertical-align:middle;"></span>
+      ${b.name}
+    </div>`
+  ).join('');
+
+  // Title sizes
+  const ts = document.getElementById('title-sizes');
+  ts.innerHTML = titleSizes.map((s, i) =>
+    `<button class="size-btn ${s.name === state.titleSize.name ? 'active' : ''}"
+             onclick="setState('titleSize', ${i})">${s.name}</button>`
+  ).join('');
+
+  // Title weights
+  const tw = document.getElementById('title-weights');
+  tw.innerHTML = titleWeights.map((w, i) =>
+    `<button class="size-btn ${w.name === state.titleWeight.name ? 'active' : ''}"
+             onclick="setState('titleWeight', ${i})">${w.name}</button>`
+  ).join('');
+
+  // Apply to preview
+  document.body.style.background = state.bg.bg;
+  document.querySelectorAll('.preview-card').forEach(el => {
+    el.style.background = state.bg.card;
+  });
+
+  // Heading font
+  const headingEls = ['title-sample', 'author-name-1', 'author-name-2', 'metric-author'];
+  headingEls.forEach(id => {
+    const el = document.getElementById(id);
+    el.style.fontFamily = state.headingFont.css;
+  });
+  document.getElementById('title-sample').style.fontSize = state.titleSize.size;
+  document.getElementById('title-sample').style.fontWeight = state.titleWeight.weight;
+
+  // Mono font
+  document.querySelectorAll('.preview-mono, .tag, .score, .score-label').forEach(el => {
+    el.style.fontFamily = state.monoFont.css;
+  });
+
+  // Body font
+  document.getElementById('subtitle-sample').style.fontFamily = state.bodyFont.css;
+  document.getElementById('sample-display').style.fontFamily = state.bodyFont.css;
+  document.querySelectorAll('.verdict-box div:not(.verdict-text)').forEach(el => {
+    el.style.fontFamily = state.bodyFont.css;
+  });
+
+  // Accent color
+  document.getElementById('score-display').style.color = state.accent.hex;
+  document.getElementById('verdict-label').style.color = state.accent.hex;
+  document.getElementById('btn-primary').style.background = state.accent.hex;
+  document.getElementById('btn-primary').style.color = luminance(state.accent.hex) > 0.5 ? '#000' : '#fff';
+
+  // Convergence bars
+  const barHeights = [60, 45, 30, 22, 18];
+  for (let i = 0; i < 5; i++) {
+    const bar = document.getElementById('bar' + (i + 1));
+    bar.style.height = barHeights[i] + 'px';
+    bar.style.background = state.accent.hex;
+    bar.style.opacity = 0.4 + (i * 0.15);
+  }
+
+  // Metric bars
+  const mb = document.getElementById('metric-bars');
+  mb.innerHTML = metrics.map(m =>
+    `<div class="metric-row">
+      <span class="metric-label" style="font-family: ${state.monoFont.css}">${m.label}</span>
+      <div class="metric-bar">
+        <div class="metric-fill" style="width: ${m.value}%; background: ${state.accent.hex}"></div>
+      </div>
+      <span class="metric-val" style="font-family: ${state.monoFont.css}">${m.value}</span>
+    </div>`
+  ).join('');
+
+  // Selection output
+  document.getElementById('selection-output').textContent =
+    `heading: "${state.headingFont.name}"\nmono: "${state.monoFont.name}"\nbody: "${state.bodyFont.name}"\naccent: "${state.accent.name}" (${state.accent.hex})\nbackground: "${state.bg.name}"\ntitle-size: ${state.titleSize.size}\ntitle-weight: ${state.titleWeight.weight}`;
+}
+
+function setState(key, idx) {
+  const maps = {
+    accent: accentColors,
+    bg: bgOptions,
+    titleSize: titleSizes,
+    titleWeight: titleWeights,
+  };
+  state[key] = maps[key][idx];
+  render();
+}
+
+function luminance(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+render();
+</script>
+</body>
+</html>

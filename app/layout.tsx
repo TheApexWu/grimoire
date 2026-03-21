@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: "Grimoire - Agentic Writing Workshop",
   description:
     "Capture any writing voice. Study it. Channel it. An agentic writing workshop that makes invisible craft visible.",
+  icons: { icon: "/favicon.svg" },
 };
 
 export default function RootLayout({

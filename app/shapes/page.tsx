@@ -8,17 +8,17 @@ import kafka from "@/data/library/kafka.json";
 import woolf from "@/data/library/woolf.json";
 import fitzgerald from "@/data/library/fitzgerald.json";
 import { computeUniformityScore } from "@/components/VoiceShape";
+import { statFingerprintToRadar } from "@/lib/fingerprint";
 
 const VoiceShape = lazy(() => import("@/components/VoiceShape"));
 
-const authors = [
-  { data: hemingway, color: "#f59e0b" },
-  { data: poe, color: "#8b5cf6" },
-  { data: twain, color: "#3b82f6" },
-  { data: kafka, color: "#ef4444" },
-  { data: woolf, color: "#ec4899" },
-  { data: fitzgerald, color: "#22c55e" },
-];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const rawAuthors = [hemingway, poe, twain, kafka, woolf, fitzgerald] as any[];
+const colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ef4444", "#ec4899", "#22c55e"];
+const authors = rawAuthors.map((a, i) => ({
+  data: { ...a, radar: statFingerprintToRadar(a.stats) },
+  color: colors[i],
+}));
 
 export default function ShapesPage() {
   return (
@@ -53,8 +53,9 @@ export default function ShapesPage() {
                     <VoiceShape
                       values={radarValues}
                       color={color}
-                      rotateSpeed={0.15}
+                      rotateSpeed={0.1}
                       label={data.name}
+                      detail={2}
                     />
                   </Suspense>
                 </div>
