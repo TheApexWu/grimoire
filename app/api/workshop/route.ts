@@ -6,24 +6,56 @@ import {
   statFingerprintToRadar,
 } from "@/lib/fingerprint";
 import type { StatFingerprint } from "@/lib/fingerprint";
-import { coachPrompt } from "@/lib/prompts";
+import { coachPrompt, generationPrompt } from "@/lib/prompts";
+
+type Mode = "coach" | "generate";
+
+interface CoachInput {
+  mode: "coach";
+  userText: string;
+  targetSample: string;
+  targetFingerprint: StatFingerprint;
+  rounds?: number;
+}
+
+interface GenerateInput {
+  mode: "generate";
+  sampleText: string;
+  targetFingerprint: StatFingerprint;
+  rounds?: number;
+  topic?: string;
+}
+
+type WorkshopInput = CoachInput | GenerateInput;
 
 export async function POST(request: Request) {
-  const {
-    userText,
-    targetSample,
-    targetFingerprint,
-    rounds = 3,
-  } = await request.json();
+  const body = (await request.json()) as WorkshopInput;
+  const mode: Mode = body.mode || "coach";
+  const rounds = body.rounds || 3;
 
-  if (!userText || !targetSample || !targetFingerprint) {
-    return Response.json(
-      { error: "userText, targetSample, and targetFingerprint required" },
-      { status: 400 }
-    );
+  if (mode === "coach") {
+    const { userText, targetSample, targetFingerprint } = body as CoachInput;
+    if (!userText || !targetSample || !targetFingerprint) {
+      return Response.json(
+        { error: "userText, targetSample, and targetFingerprint required" },
+        { status: 400 }
+      );
+    }
+  } else {
+    const { sampleText, targetFingerprint } = body as GenerateInput;
+    if (!sampleText || !targetFingerprint) {
+      return Response.json(
+        { error: "sampleText and targetFingerprint required" },
+        { status: 400 }
+      );
+    }
   }
 
-  const target: StatFingerprint = targetFingerprint;
+  const target: StatFingerprint =
+    mode === "coach"
+      ? (body as CoachInput).targetFingerprint
+      : (body as GenerateInput).targetFingerprint;
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -46,23 +78,34 @@ export async function POST(request: Request) {
         }[] = [];
 
         for (let round = 1; round <= rounds; round++) {
-          send("round-start", { round, total: rounds });
+          send("round-start", { round, total: rounds, mode });
 
           const temperatures = [0.7, 0.9, 1.1];
-          const candidatePromises = temperatures.map((temp) =>
-            generateText({
+          const candidatePromises = temperatures.map((temp) => {
+            const prompt =
+              mode === "coach"
+                ? coachPrompt({
+                    userText: (body as CoachInput).userText,
+                    targetSample: (body as CoachInput).targetSample,
+                    targetFingerprint: target,
+                    gapAnalysis: previousGapAnalysis,
+                    round,
+                  })
+                : generationPrompt({
+                    sampleText: (body as GenerateInput).sampleText,
+                    targetFingerprint: target,
+                    topic: (body as GenerateInput).topic,
+                    gapAnalysis: previousGapAnalysis,
+                    round,
+                  });
+
+            return generateText({
               model: google("gemini-3.1-pro-preview"),
-              prompt: coachPrompt({
-                userText,
-                targetSample,
-                targetFingerprint: target,
-                gapAnalysis: previousGapAnalysis,
-                round,
-              }),
+              prompt,
               temperature: temp,
-              maxOutputTokens: 600,
-            })
-          );
+              maxOutputTokens: mode === "coach" ? 600 : 500,
+            });
+          });
 
           const responses = await Promise.all(candidatePromises);
 
@@ -106,6 +149,7 @@ export async function POST(request: Request) {
 
         const final = allResults[allResults.length - 1];
         send("done", {
+          mode,
           finalText: final.bestText,
           finalDistance: final.bestDistance,
           finalFingerprint: final.bestFingerprint,
@@ -124,7 +168,7 @@ export async function POST(request: Request) {
         });
       } catch (err) {
         send("error", {
-          error: err instanceof Error ? err.message : "Coach failed",
+          error: err instanceof Error ? err.message : "Workshop failed",
         });
       }
 

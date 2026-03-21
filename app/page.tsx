@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   RadarChart,
   PolarGrid,
@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 
 import hemingway from "@/data/fallbacks/hemingway.json";
 import poe from "@/data/fallbacks/poe.json";
@@ -111,52 +112,42 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [ttsPlaying, setTtsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { isSignedIn, user } = useUser();
 
-  // --- Helpers ---
+  // --- SSE consumer ---
 
-  const fetchFingerprint = async (text: string) => {
-    const res = await fetch("/api/fingerprint", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    return data as { stats: StatFingerprint; radar: RadarPoint[] };
-  };
+  const consumeSSE = async (
+    res: Response,
+    handlers: Record<string, (data: Record<string, unknown>) => void>
+  ) => {
+    if (!res.ok || !res.body) throw new Error("Stream request failed");
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
 
-  const fetchVoiceReading = async (text: string) => {
-    const res = await fetch("/api/voice-reading", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-    const data = await res.json();
-    return data.reading as VoiceReading;
-  };
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
 
-  const computeDistance = (a: StatFingerprint, b: StatFingerprint): number => {
-    const ranges: Record<keyof StatFingerprint, [number, number]> = {
-      monosyllableRatio: [0.5, 1.0],
-      sentenceMean: [5, 50],
-      sentenceStd: [2, 30],
-      sentenceSkew: [-1, 4],
-      commaRate: [0, 5],
-      semicolonRate: [0, 1],
-      periodRate: [0, 3],
-      lexicalDiversity: [0.3, 0.85],
-      conjunctionDensity: [0, 3],
-      paragraphMean: [1, 15],
-      paragraphStd: [0, 8],
-    };
-    let sq = 0;
-    const keys = Object.keys(ranges) as (keyof StatFingerprint)[];
-    for (const key of keys) {
-      const [min, max] = ranges[key];
-      const norm = (v: number) => (v - min) / (max - min);
-      sq += (norm(a[key]) - norm(b[key])) ** 2;
+      let currentEvent = "";
+      for (const line of lines) {
+        if (line.startsWith("event: ")) {
+          currentEvent = line.slice(7);
+        } else if (line.startsWith("data: ") && currentEvent) {
+          const data = JSON.parse(line.slice(6));
+          if (currentEvent === "error") throw new Error(data.error);
+          handlers[currentEvent]?.(data);
+          currentEvent = "";
+        }
+      }
     }
-    return Math.round(Math.sqrt(sq / keys.length) * 1000) / 1000;
   };
 
   // --- Actions ---
@@ -210,40 +201,44 @@ export default function Home() {
     setError("");
     setInsights("");
 
-    try {
-      // Fingerprint both in parallel
-      const [dataA, dataB] = await Promise.all([
-        fetchFingerprint(textA),
-        fetchFingerprint(textB),
-      ]);
-      setFpA(dataA.stats);
-      setRadarA(dataA.radar);
-      setFpB(dataB.stats);
-      setRadarB(dataB.radar);
-      const nA = nameA || "Text A";
-      const nB = nameB || "Text B";
-      setNameA(nA);
-      setNameB(nB);
-      setDistance(computeDistance(dataA.stats, dataB.stats));
-      setView("compare");
+    const nA = nameA || "Text A";
+    const nB = nameB || "Text B";
+    setNameA(nA);
+    setNameB(nB);
 
-      // Voice readings + insights in parallel (non-blocking)
-      Promise.all([
-        fetchVoiceReading(textA).then((v) => setVoiceA(v)),
-        fetchVoiceReading(textB).then((v) => setVoiceB(v)),
-        fetch("/api/insight", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            nameA: nA,
-            nameB: nB,
-            fpA: dataA.stats,
-            fpB: dataB.stats,
-          }),
-        })
-          .then((r) => r.json())
-          .then((d) => setInsights(d.insights)),
-      ]).catch(() => {});
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          texts: [
+            { text: textA, name: nA },
+            { text: textB, name: nB },
+          ],
+        }),
+      });
+
+      await consumeSSE(res, {
+        fingerprints: (data) => {
+          const results = data.results as { index: number; stats: StatFingerprint; radar: RadarPoint[] }[];
+          for (const r of results) {
+            if (r.index === 0) { setFpA(r.stats); setRadarA(r.radar); }
+            else { setFpB(r.stats); setRadarB(r.radar); }
+          }
+          setView("compare");
+        },
+        distance: (data) => {
+          setDistance(data.value as number);
+        },
+        voice: (data) => {
+          const reading = data.reading as VoiceReading;
+          if (data.index === 0) setVoiceA(reading);
+          else setVoiceB(reading);
+        },
+        insights: (data) => {
+          setInsights(data.text as string);
+        },
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analysis failed");
     } finally {
@@ -264,10 +259,11 @@ export default function Home() {
     setError("");
 
     try {
-      const res = await fetch("/api/coach", {
+      const res = await fetch("/api/workshop", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          mode: "coach",
           userText: textA,
           targetSample: textB,
           targetFingerprint: fpB,
@@ -275,69 +271,44 @@ export default function Home() {
         }),
       });
 
-      if (!res.ok || !res.body) {
-        throw new Error("Coach request failed");
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        let currentEvent = "";
-        for (const line of lines) {
-          if (line.startsWith("event: ")) {
-            currentEvent = line.slice(7);
-          } else if (line.startsWith("data: ") && currentEvent) {
-            const data = JSON.parse(line.slice(6));
-
-            if (currentEvent === "round-start") {
-              setCoachRound(data.round);
-            } else if (currentEvent === "round-complete") {
-              setCoachConvergence((prev) => [
-                ...prev,
-                { round: data.round, distance: data.bestDistance },
-              ]);
-              setCoachPreviewText(data.bestText);
-              setCoachRadar(data.bestRadar);
-            } else if (currentEvent === "done") {
-              setCoachResult({
-                results: data.results,
-                finalText: data.finalText,
-                finalDistance: data.finalDistance,
-                finalFingerprint: data.finalFingerprint,
-                convergence: data.convergence,
-              });
-              setCoachRadar(data.finalRadar);
-              setView("coached");
-              // Fire judge in background (non-blocking)
-              fetch("/api/judge", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  originalText: textB,
-                  generatedText: data.finalText,
-                }),
-              })
-                .then((r) => r.json())
-                .then((v) => setJudgeVerdict(v))
-                .catch(() => {});
-            } else if (currentEvent === "error") {
-              throw new Error(data.error);
-            }
-            currentEvent = "";
-          }
-        }
-      }
+      await consumeSSE(res, {
+        "round-start": (data) => {
+          setCoachRound(data.round as number);
+        },
+        "round-complete": (data) => {
+          setCoachConvergence((prev) => [
+            ...prev,
+            { round: data.round as number, distance: data.bestDistance as number },
+          ]);
+          setCoachPreviewText(data.bestText as string);
+          setCoachRadar(data.bestRadar as RadarPoint[]);
+        },
+        done: (data) => {
+          setCoachResult({
+            results: data.results as RoundResult[],
+            finalText: data.finalText as string,
+            finalDistance: data.finalDistance as number,
+            finalFingerprint: data.finalFingerprint as StatFingerprint,
+            convergence: data.convergence as { round: number; distance: number }[],
+          });
+          setCoachRadar(data.finalRadar as RadarPoint[]);
+          setView("coached");
+          // Fire judge in background (non-blocking)
+          fetch("/api/judge", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              originalText: textB,
+              generatedText: data.finalText,
+            }),
+          })
+            .then((r) => r.json())
+            .then((v) => setJudgeVerdict(v))
+            .catch(() => {});
+        },
+      });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Coach failed");
+      setError(e instanceof Error ? e.message : "Workshop failed");
       setView("compare");
     } finally {
       setLoading(false);
@@ -361,8 +332,69 @@ export default function Home() {
     setCoachResult(null);
     setCoachRadar([]);
     setJudgeVerdict(null);
+    setSaved(false);
     setError("");
   }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!coachResult || saving) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nameA,
+          nameB,
+          textA,
+          textB,
+          fpA,
+          fpB,
+          coachedText: coachResult.finalText,
+          finalDistance: coachResult.finalDistance,
+          judgeVerdict,
+          userId: user?.id || "anonymous",
+        }),
+      });
+      if (!res.ok) throw new Error("Save failed");
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  }, [coachResult, nameA, nameB, textA, textB, fpA, fpB, judgeVerdict, user, saving]);
+
+  const handleTts = useCallback(async (text: string) => {
+    if (ttsPlaying && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+      setTtsPlaying(false);
+      return;
+    }
+    setTtsPlaying(true);
+    try {
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.slice(0, 3000) }),
+      });
+      if (!res.ok) throw new Error("TTS failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        setTtsPlaying(false);
+        audioRef.current = null;
+        URL.revokeObjectURL(url);
+      };
+      audio.play();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "TTS failed");
+      setTtsPlaying(false);
+    }
+  }, [ttsPlaying]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -376,14 +408,25 @@ export default function Home() {
               agentic writing workshop
             </p>
           </button>
-          {view !== "home" && (
-            <button
-              onClick={reset}
-              className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors font-[family-name:var(--font-geist-mono)]"
-            >
-              START OVER
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {view !== "home" && (
+              <button
+                onClick={reset}
+                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors font-[family-name:var(--font-geist-mono)]"
+              >
+                START OVER
+              </button>
+            )}
+            {isSignedIn ? (
+              <UserButton />
+            ) : (
+              <SignInButton mode="modal">
+                <button className="text-sm px-3 py-1.5 border border-zinc-700 rounded hover:border-zinc-500 transition-colors font-[family-name:var(--font-geist-mono)]">
+                  SIGN IN
+                </button>
+              </SignInButton>
+            )}
+          </div>
         </div>
       </header>
 
@@ -883,6 +926,38 @@ export default function Home() {
                 Running blind judge test...
               </div>
             )}
+
+            {/* Save + TTS action bar */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleTts(coachResult.finalText)}
+                className="flex-1 py-3 border border-zinc-800 rounded-lg text-zinc-300 hover:text-white hover:border-zinc-600 transition-colors flex items-center justify-center gap-2 font-[family-name:var(--font-geist-mono)] text-sm"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {ttsPlaying ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                  )}
+                </svg>
+                {ttsPlaying ? "STOP" : "HEAR THE RHYTHM"}
+              </button>
+              {isSignedIn ? (
+                <button
+                  onClick={handleSave}
+                  disabled={saved || saving}
+                  className="flex-1 py-3 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 font-[family-name:var(--font-geist-mono)] text-sm"
+                >
+                  {saved ? "SAVED TO GRIMOIRE" : saving ? "SAVING..." : "SAVE TO GRIMOIRE"}
+                </button>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="flex-1 py-3 border border-zinc-700 rounded-lg text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors font-[family-name:var(--font-geist-mono)] text-sm">
+                    SIGN IN TO SAVE
+                  </button>
+                </SignInButton>
+              )}
+            </div>
 
             <button
               onClick={reset}
