@@ -30,7 +30,7 @@ interface Author {
 // Recompute radar from stats using tightened literary-prose normalization
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rawAuthors = [hemingway, poe, twain, kafka, woolf, fitzgerald] as any[];
-const colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ef4444", "#ec4899", "#22c55e"];
+const colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ef4444", "#ec4899", "#f43f5e"];
 const catalog: { data: Author; color: string }[] = rawAuthors.map((a, i) => ({
   data: { ...a, radar: statFingerprintToRadar(a.stats) } as Author,
   color: colors[i],
@@ -50,7 +50,7 @@ export default function CatalogPage() {
         {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Voice Catalog</h1>
+            <h1 className="text-4xl font-bold tracking-tight font-[family-name:var(--font-heading)]">Voice Catalog</h1>
             <p className="text-zinc-500 mt-1">
               Select a source voice and a target. See how they compare. Start coaching.
             </p>
@@ -240,7 +240,7 @@ export default function CatalogPage() {
                     <div key={sr.label} className="space-y-1">
                       <div className="flex justify-between text-[11px]">
                         <span className="text-zinc-500">{sr.label}</span>
-                        <span className={`font-[family-name:var(--font-geist-mono)] ${delta > 0.05 ? "text-green-400" : delta < -0.05 ? "text-red-400" : "text-zinc-600"}`}>
+                        <span className={`font-[family-name:var(--font-geist-mono)] ${delta > 0.05 ? "text-rose-400" : delta < -0.05 ? "text-red-400" : "text-zinc-600"}`}>
                           {delta > 0 ? "+" : ""}{(delta * 100).toFixed(0)}
                         </span>
                       </div>

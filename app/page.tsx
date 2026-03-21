@@ -458,7 +458,7 @@ export default function Home() {
       <header className="border-b border-zinc-800 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button onClick={reset} className="text-left">
-            <h1 className="text-xl font-bold tracking-tight font-[family-name:var(--font-geist-mono)]">
+            <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-heading)]">
               GRIMOIRE
             </h1>
             <p className="text-xs text-zinc-500 font-[family-name:var(--font-geist-mono)]">
@@ -498,7 +498,7 @@ export default function Home() {
         {view === "home" && (
           <div className="space-y-10">
             <div className="text-center space-y-4 pt-6">
-              <h2 className="text-5xl font-bold tracking-tight leading-tight">
+              <h2 className="font-bold tracking-tight leading-tight font-[family-name:var(--font-heading)]" style={{ fontSize: "52px" }}>
                 Your writing has a shape
               </h2>
               <p className="text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
@@ -596,7 +596,7 @@ export default function Home() {
         {view === "diagnose" && fpA && radarA.length > 0 && (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-3xl font-bold">{nameA || "Your Writing"}</h2>
+              <h2 className="text-3xl font-bold font-[family-name:var(--font-heading)]">{nameA || "Your Writing"}</h2>
               <p className="text-zinc-500 text-sm mt-1">voice shape + diagnosis</p>
             </div>
 
@@ -606,7 +606,7 @@ export default function Home() {
                 <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-600">Loading shape...</div>}>
                   <VoiceShape
                     values={radarA.map((r) => r.value)}
-                    color="#22c55e"
+                    color="#f43f5e"
                     label={nameA || "Your Voice Shape"}
                   />
                 </Suspense>
@@ -624,7 +624,7 @@ export default function Home() {
                       VOICE DISTINCTIVENESS
                     </div>
                     <div className="text-5xl font-bold font-[family-name:var(--font-geist-mono)]" style={{
-                      color: score > 60 ? "#22c55e" : score > 30 ? "#f59e0b" : "#ef4444",
+                      color: score > 60 ? "#f43f5e" : score > 30 ? "#f59e0b" : "#ef4444",
                     }}>
                       {score}
                     </div>
@@ -640,7 +640,7 @@ export default function Home() {
                         className="h-full rounded-full transition-all duration-1000"
                         style={{
                           width: `${score}%`,
-                          background: score > 60 ? "#22c55e" : score > 30 ? "#f59e0b" : "#ef4444",
+                          background: score > 60 ? "#f43f5e" : score > 30 ? "#f59e0b" : "#ef4444",
                         }}
                       />
                     </div>
@@ -653,7 +653,7 @@ export default function Home() {
                   <div className="border border-zinc-800 rounded-lg p-6 space-y-4">
                     {diagnosis.distinctive.length > 0 && (
                       <div>
-                        <div className="text-xs text-green-400/60 font-[family-name:var(--font-geist-mono)] mb-1">
+                        <div className="text-xs text-rose-400/60 font-[family-name:var(--font-geist-mono)] mb-1">
                           DISTINCTIVE (your signature)
                         </div>
                         <div className="text-sm text-zinc-300">
@@ -689,7 +689,7 @@ export default function Home() {
 
             {/* CTA: Pick a target voice */}
             <div className="border border-zinc-800 rounded-lg p-6 text-center space-y-4">
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold font-[family-name:var(--font-heading)]">
                 Now reshape it
               </h3>
               <p className="text-zinc-500 text-sm max-w-lg mx-auto">
@@ -739,7 +739,7 @@ export default function Home() {
           <div className="space-y-8">
             <div className="flex items-end justify-between">
               <div>
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
                   {nameA} vs {nameB}
                 </h2>
                 <p className="text-zinc-500 text-sm mt-1">
@@ -848,7 +848,7 @@ export default function Home() {
 
             {/* Coach CTA */}
             <div className="border border-zinc-800 rounded-lg p-6 text-center space-y-3">
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-lg font-semibold font-[family-name:var(--font-heading)]">
                 Channel {nameB}&apos;s voice
               </h3>
               <p className="text-zinc-500 text-sm max-w-lg mx-auto">
@@ -902,13 +902,13 @@ export default function Home() {
                       </span>
                       <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-green-500 rounded-full transition-all duration-700"
+                          className="h-full bg-rose-500 rounded-full transition-all duration-700"
                           style={{
                             width: `${Math.max(5, (1 - c.distance) * 100)}%`,
                           }}
                         />
                       </div>
-                      <span className="font-[family-name:var(--font-geist-mono)] text-green-400/80 w-16 text-right">
+                      <span className="font-[family-name:var(--font-geist-mono)] text-rose-400/80 w-16 text-right">
                         {c.distance.toFixed(3)}
                       </span>
                     </div>
@@ -942,13 +942,13 @@ export default function Home() {
                     </Suspense>
                   </div>
                 </div>
-                <div className="border border-green-900/40 rounded-lg p-4">
-                  <h3 className="text-xs font-semibold text-green-400/60 mb-1 font-[family-name:var(--font-geist-mono)]">
+                <div className="border border-rose-900/40 rounded-lg p-4">
+                  <h3 className="text-xs font-semibold text-rose-400/60 mb-1 font-[family-name:var(--font-geist-mono)]">
                     CURRENT (morphing)
                   </h3>
                   <div style={{ height: 280 }}>
                     <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
-                      <VoiceShape values={coachRadar.map(r => r.value)} color="#22c55e" label="Current" />
+                      <VoiceShape values={coachRadar.map(r => r.value)} color="#f43f5e" label="Current" />
                     </Suspense>
                   </div>
                 </div>
@@ -957,8 +957,8 @@ export default function Home() {
 
             {/* Live preview */}
             {coachPreviewText && (
-              <div className="border border-green-900/30 rounded-lg p-5">
-                <h3 className="text-sm font-semibold text-green-400/60 mb-2 font-[family-name:var(--font-geist-mono)]">
+              <div className="border border-rose-900/30 rounded-lg p-5">
+                <h3 className="text-sm font-semibold text-rose-400/60 mb-2 font-[family-name:var(--font-geist-mono)]">
                   LATEST BEST CANDIDATE
                 </h3>
                 <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto">
@@ -975,13 +975,13 @@ export default function Home() {
           <div className="space-y-8">
             <div className="flex items-end justify-between">
               <div>
-                <h2 className="text-2xl font-bold">
+                <h2 className="text-2xl font-bold font-[family-name:var(--font-heading)]">
                   Your text, channeled toward {nameB}
                 </h2>
                 <p className="text-zinc-500 text-sm mt-1">
                   {coachResult.roundsCompleted || coachResult.results.length} round{(coachResult.roundsCompleted || coachResult.results.length) !== 1 ? "s" : ""}, {(coachResult.roundsCompleted || coachResult.results.length) * 3} candidates evaluated
                   {coachResult.convergedEarly && (
-                    <span className="ml-2 text-green-400 font-[family-name:var(--font-geist-mono)]">
+                    <span className="ml-2 text-rose-400 font-[family-name:var(--font-geist-mono)]">
                       CONVERGED EARLY
                     </span>
                   )}
@@ -1009,13 +1009,13 @@ export default function Home() {
                   </Suspense>
                 </div>
               </div>
-              <div className="border border-green-800/60 rounded-lg p-4">
-                <h3 className="text-xs font-semibold text-green-400/80 mb-1 font-[family-name:var(--font-geist-mono)] text-center">
+              <div className="border border-rose-800/60 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-rose-400/80 mb-1 font-[family-name:var(--font-geist-mono)] text-center">
                   COACHED
                 </h3>
                 <div style={{ height: 300 }}>
                   <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
-                    <VoiceShape values={coachRadar.map(r => r.value)} color="#22c55e" label="Coached" />
+                    <VoiceShape values={coachRadar.map(r => r.value)} color="#f43f5e" label="Coached" />
                   </Suspense>
                 </div>
               </div>
@@ -1060,9 +1060,9 @@ export default function Home() {
                   <Line
                     type="monotone"
                     dataKey="distance"
-                    stroke="#22c55e"
+                    stroke="#f43f5e"
                     strokeWidth={2}
-                    dot={{ fill: "#22c55e", r: 4 }}
+                    dot={{ fill: "#f43f5e", r: 4 }}
                     name="Best so far"
                   />
                   <Line
@@ -1088,8 +1088,8 @@ export default function Home() {
                   {textA.slice(0, 1200)}
                 </p>
               </div>
-              <div className="border border-green-800/60 rounded-lg p-5">
-                <h3 className="text-sm font-semibold text-green-400 mb-3 font-[family-name:var(--font-geist-mono)]">
+              <div className="border border-rose-800/60 rounded-lg p-5">
+                <h3 className="text-sm font-semibold text-rose-400 mb-3 font-[family-name:var(--font-geist-mono)]">
                   COACHED OUTPUT
                 </h3>
                 <p className="text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap max-h-52 overflow-y-auto">
@@ -1120,7 +1120,7 @@ export default function Home() {
                     <span className="text-zinc-600 font-[family-name:var(--font-geist-mono)] w-20">
                       Round {r.round}
                     </span>
-                    <span className="font-[family-name:var(--font-geist-mono)] text-green-400/80">
+                    <span className="font-[family-name:var(--font-geist-mono)] text-rose-400/80">
                       best={r.bestDistance.toFixed(3)}
                     </span>
                     <span className="text-zinc-600 text-xs">
@@ -1137,7 +1137,7 @@ export default function Home() {
             {/* LLM Blind Test */}
             {judgeVerdict && (
               <div className={`border rounded-lg p-6 ${
-                judgeVerdict.sameAuthor ? "border-green-800/60" : "border-zinc-800"
+                judgeVerdict.sameAuthor ? "border-rose-800/60" : "border-zinc-800"
               }`}>
                 <h3 className="text-sm font-semibold text-zinc-400 mb-3 font-[family-name:var(--font-geist-mono)]">
                   BLIND AUTHORSHIP TEST
@@ -1146,7 +1146,7 @@ export default function Home() {
                   <div
                     className={`text-3xl font-bold font-[family-name:var(--font-geist-mono)] ${
                       judgeVerdict.sameAuthor
-                        ? "text-green-400"
+                        ? "text-rose-400"
                         : "text-amber-400"
                     }`}
                   >

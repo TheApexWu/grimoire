@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { EB_Garamond, Martian_Mono, Manrope } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const heading = EB_Garamond({
+  variable: "--font-heading",
   subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
-const geistMono = Geist_Mono({
+const mono = Martian_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const body = Manrope({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -28,9 +36,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      className={`${heading.variable} ${mono.variable} ${body.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+      <body className="min-h-full flex flex-col bg-black text-zinc-100 font-[family-name:var(--font-geist-sans)]">
         <ClerkProvider appearance={{
           variables: { colorPrimary: "#fff", colorBackground: "#09090b", colorText: "#f4f4f5" },
         }}>

@@ -14,7 +14,7 @@ const VoiceShape = lazy(() => import("@/components/VoiceShape"));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rawAuthors = [hemingway, poe, twain, kafka, woolf, fitzgerald] as any[];
-const colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ef4444", "#ec4899", "#22c55e"];
+const colors = ["#f59e0b", "#8b5cf6", "#3b82f6", "#ef4444", "#ec4899", "#f43f5e"];
 const authors = rawAuthors.map((a, i) => ({
   data: { ...a, radar: statFingerprintToRadar(a.stats) },
   color: colors[i],
@@ -25,7 +25,7 @@ export default function ShapesPage() {
     <div className="min-h-screen bg-black text-white">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold tracking-tight mb-3">
+          <h1 className="font-bold tracking-tight mb-3 font-[family-name:var(--font-heading)]" style={{ fontSize: "52px" }}>
             Voice Shapes
           </h1>
           <p className="text-zinc-400 text-lg">

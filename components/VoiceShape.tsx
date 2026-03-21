@@ -25,7 +25,7 @@ interface VoiceShapeProps {
 
 function DeformedSphere({
   values,
-  color = "#22c55e",
+  color = "#f43f5e",
   opacity = 0.7,
   wireframe = false,
   rotateSpeed = 0.3,
@@ -114,7 +114,7 @@ function DeformedSphere({
 
 export default function VoiceShape({
   values,
-  color = "#22c55e",
+  color = "#f43f5e",
   targetValues,
   targetColor = "#3b82f6",
   rotateSpeed = 0.3,
