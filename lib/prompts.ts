@@ -124,7 +124,7 @@ export function judgePrompt(params: {
   textA: string;
   textB: string;
 }): string {
-  return `You are a literary forensics expert. Were these two texts written by the same author?
+  return `You are a writing style analyst. Read these two passages and decide if they could plausibly have been written by the same author based on structural and rhythmic similarity.
 
 TEXT A:
 ---
@@ -136,7 +136,9 @@ TEXT B:
 ${params.textB.slice(0, 1500)}
 ---
 
-Consider sentence structure, word choice, punctuation patterns, and voice.
+Focus on: sentence length patterns, punctuation cadence, vocabulary complexity, and rhythmic structure. Do NOT focus on topic, subject matter, or thematic content. Two passages by the same author can be about completely different things.
+
+If the structural patterns (sentence rhythm, word complexity, punctuation habits) are similar, lean toward sameAuthor: true. Only say false if the structural DNA is clearly different.
 
 You MUST respond with ONLY a JSON object, no other text before or after:
 {"sameAuthor": true, "confidence": 0.85, "reasoning": "Both texts share..."}
@@ -144,7 +146,7 @@ You MUST respond with ONLY a JSON object, no other text before or after:
 Rules:
 - sameAuthor: boolean
 - confidence: number between 0.0 and 1.0
-- reasoning: one sentence
+- reasoning: one sentence about structural similarity
 - Output the JSON object and NOTHING else`;
 }
 
