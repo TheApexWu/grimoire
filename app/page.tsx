@@ -513,7 +513,7 @@ export default function Home() {
               {[
                 { step: "01", title: "DIAGNOSE", desc: "Paste any text. See its 3D voice shape instantly. Find what's flat, what's distinctive, what's dead." },
                 { step: "02", title: "TARGET", desc: "Pick a voice to aim for. Hemingway's angular edges. Poe's ornate spirals. Or paste your own target." },
-                { step: "03", title: "RESHAPE", desc: "The agent rewrites your prose in 3 rounds. Watch the shape morph toward the target. Prove it with a blind judge." },
+                { step: "03", title: "RESHAPE", desc: "The agent rewrites your prose in 5 rounds. Watch the shape morph toward the target. Prove it with a blind judge." },
               ].map((s) => (
                 <div key={s.step} className="border border-zinc-800/60 rounded-lg p-4 space-y-2">
                   <div className="text-xs text-zinc-600 font-[family-name:var(--font-geist-mono)]">{s.step}</div>
@@ -694,7 +694,7 @@ export default function Home() {
               </h3>
               <p className="text-zinc-500 text-sm max-w-lg mx-auto">
                 Pick a target voice. The agent will rewrite your text toward that shape
-                in 3 rounds of selection pressure.
+                in 5 rounds of selection pressure.
               </p>
               <div className="flex gap-3 justify-center flex-wrap">
                 {library.map((a) => (
@@ -852,9 +852,9 @@ export default function Home() {
                 Channel {nameB}&apos;s voice
               </h3>
               <p className="text-zinc-500 text-sm max-w-lg mx-auto">
-                The style coach agent will rewrite your text with{" "}
+                The agent rewrites your text with{" "}
                 {nameB}&apos;s rhythm and vocabulary. Your ideas, their
-                cadence. 3 rounds of selection pressure, 3 candidates per round,
+                cadence. 5 rounds of selection pressure, 3 candidates per round,
                 best survives.
               </p>
               <button
@@ -880,7 +880,7 @@ export default function Home() {
                   Style Coach Running
                 </p>
                 <p className="text-zinc-500 text-sm">
-                  Round {coachRound} of 3 &middot; 3 candidates per round
+                  Round {coachRound} of 5 &middot; 3 candidates per round
                 </p>
               </div>
             </div>

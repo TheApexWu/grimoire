@@ -4,12 +4,12 @@
 Alex Wu / amadeusWoo
 
 ## Project Description
-Grimoire clones any writing voice. Paste text, get a statistical fingerprint (9 metrics: syllable density, sentence rhythm, punctuation cadence, lexical diversity). See it as an interactive 3D shape. Then watch a multi-round agent rewrite your prose toward any target author's profile.
+Grimoire clones any writing voice. Paste text, get a statistical fingerprint across 7 dimensions: monosyllable ratio, sentence length, sentence variation, comma density, semicolon usage, lexical diversity, and conjunction frequency. See the fingerprint as an interactive 3D voice shape. Then watch a multi-round agent rewrite your prose toward any target author's profile.
 
 The agent generates 3 candidates per round at varied temperatures, scores each against the fingerprint, keeps the best, and feeds the gap back. Over 5 rounds the output converges toward the target. A blind LLM judge validates whether the result passes as the target author. Ships with 6 pre-computed voices (Hemingway, Poe, Twain, Kafka, Woolf, Fitzgerald). All metrics compute client-side, all AI streams in real time.
 
 ## Public GitHub Repository
-https://github.com/TheApexWu/grimoire-fresh
+https://github.com/TheApexWu/grimoire
 
 ## Demo Video
 [INSERT LINK AFTER RECORDING]

@@ -32,7 +32,7 @@ export default function ShapesPage() {
             Every writer has a shape. Flat writing is a sphere. Distinctive writing is angular, asymmetric, alive.
           </p>
           <p className="text-zinc-600 text-sm mt-2">
-            Drag to rotate. Each shape is a 3D projection of 7 statistical metrics.
+            Drag to rotate. Each shape encodes 7 dimensions of writing style.
           </p>
         </div>
 
