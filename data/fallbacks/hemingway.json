@@ -1,0 +1,59 @@
+{
+  "id": "hemingway",
+  "name": "Ernest Hemingway",
+  "work": "The Sun Also Rises",
+  "stats": {
+    "monosyllableRatio": 0.7740863787375415,
+    "sentenceMean": 11.84,
+    "sentenceStd": 10.94,
+    "sentenceSkew": 2.42,
+    "commaRate": 0.656,
+    "semicolonRate": 0.026,
+    "periodRate": 0.889,
+    "lexicalDiversity": 0.677,
+    "conjunctionDensity": 0.548,
+    "paragraphMean": 2.86,
+    "paragraphStd": 2.12
+  },
+  "radar": [
+    {
+      "label": "Monosyllable %",
+      "value": 0.548172757475083
+    },
+    {
+      "label": "Sentence Length",
+      "value": 0.152
+    },
+    {
+      "label": "Sentence Variation",
+      "value": 0.3192857142857143
+    },
+    {
+      "label": "Comma Density",
+      "value": 0.1312
+    },
+    {
+      "label": "Semicolons",
+      "value": 0.026
+    },
+    {
+      "label": "Lexical Diversity",
+      "value": 0.6854545454545455
+    },
+    {
+      "label": "Conjunctions",
+      "value": 0.18266666666666667
+    },
+    {
+      "label": "Paragraph Length",
+      "value": 0.13285714285714284
+    }
+  ],
+  "voice": {
+    "emotionalTemperature": "controlled surface tension",
+    "sensoryPalette": "visual-kinetic, light and motion",
+    "tonalRegister": "casual-declarative",
+    "imageryDensity": "high concrete, scene over thought"
+  },
+  "sampleText": "’ That gives you a lot of dope, doesn’t it?” “It gives you all the dope that’s of interest to Cohn.” “We’re going in, anyway,” I said. “There’s no use trying to move Brett and Mike out here and back before the fiesta. Should we answer it?” “We might as well,” said Bill. “There’s no need for us to be snooty.” We walked up to the post-office and asked for a telegraph blank. “What will we say?” Bill asked. “‘Arriving to-night.’ That’s enough.” We paid for the message and walked back to the inn. Harris was there and the three of us walked up to Roncesvalles. We went through the monastery. “It’s a remarkable place,” Harris said, when we came out. “But you know I’m not much on those sort of places.” “Me either,” Bill said. “It’s a remarkable place, though,” Harris said. “I wouldn’t not have seen it. I’d been intending coming up each day.” “It isn’t the same as fishing, though, is it?” Bill asked. He liked Harris. “I say not.” We were standing in front of the old chapel of the monastery. “Isn’t that a pub across the way?” Harris asked. “Or do my eyes deceive me?” “It has the look of a pub,” Bill said. “It looks to me like a pub,” I said. “I say,” said Harris, “let’s utilize it.” He had taken up utilizing from Bill. We had a bottle of wine apiece. Harris would not let us pay. He talked Spanish quite well, and the innkeeper would not take our money. “I say. You don’t know what it’s meant to me to have you chaps up here.” “We’ve had a grand time, Harris.” Harris was a little tight. “I say. Really you don’t know how much it means. I’ve not had much fun since the war.” “We’ll fish together again, some time. Don’t you forget it, Harris.” “We must. We _have_ had such a jolly good time.” “How about another bottle around?” “Jolly good idea,” said Harris. “This is mine,” said Bill. “Or we don’t drink it.” “I wish you’d let me pay for it. It _does_ give me pleasure, you know.” “This is going to give me pleasure,” Bill said. The innkeeper brought in the fourth bottle. We had kept the same glasses. Harris lifted his glass. “I say. You know this does utilize well.” Bill slapped him on the back. “Good old Harris.” “I say. You know my name isn’t really Harris. It’s Wilson-Harris. All one name. With a hyphen, you know.” “Good old Wilson-Harris,” Bill said. “We call you Harris because we’re so fond of you.” “I say, Barnes. You don’t know what this all means to me.” “Come on and utilize another glass,” I said. “Barnes. Really, Barnes, you can’t know. That’s all.” “Drink up, Harris.” We walked back down the road from Roncesvalles with Harris between us. We had lunch at the inn and Harris went with us to the bus. He gave us his card, with his"
+}

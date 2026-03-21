@@ -1,0 +1,59 @@
+{
+  "id": "twain",
+  "name": "Mark Twain",
+  "work": "Adventures of Huckleberry Finn",
+  "stats": {
+    "monosyllableRatio": 0.7668661588683352,
+    "sentenceMean": 10.13,
+    "sentenceStd": 15.17,
+    "sentenceSkew": 3.49,
+    "commaRate": 0.413,
+    "semicolonRate": 0.099,
+    "periodRate": 0.934,
+    "lexicalDiversity": 0.692,
+    "conjunctionDensity": 0.567,
+    "paragraphMean": 4.92,
+    "paragraphStd": 3.02
+  },
+  "radar": [
+    {
+      "label": "Monosyllable %",
+      "value": 0.5337323177366704
+    },
+    {
+      "label": "Sentence Length",
+      "value": 0.11400000000000002
+    },
+    {
+      "label": "Sentence Variation",
+      "value": 0.47035714285714286
+    },
+    {
+      "label": "Comma Density",
+      "value": 0.08259999999999999
+    },
+    {
+      "label": "Semicolons",
+      "value": 0.099
+    },
+    {
+      "label": "Lexical Diversity",
+      "value": 0.7127272727272725
+    },
+    {
+      "label": "Conjunctions",
+      "value": 0.18899999999999997
+    },
+    {
+      "label": "Paragraph Length",
+      "value": 0.27999999999999997
+    }
+  ],
+  "voice": {
+    "emotionalTemperature": "warm vernacular wit",
+    "sensoryPalette": "visual-tactile, river and earth",
+    "tonalRegister": "casual-ironic",
+    "imageryDensity": "high concrete, physical world dominant"
+  },
+  "sampleText": " Boggs rode off blackguarding Sherburn as loud as he could yell, all down the street; and pretty soon back he comes and stops before the store, still keeping it up. Some men crowded around him and tried to get him to shut up, but he wouldn’t; they told him it would be one o’clock in about fifteen minutes, and so he _must_ go home—he must go right away. But it didn’t do no good. He cussed away with all his might, and throwed his hat down in the mud and rode over it, and pretty soon away he went a-raging down the street again, with his gray hair a-flying. Everybody that could get a chance at him tried their best to coax him off of his horse so they could lock him up and get him sober; but it warn’t no use—up the street he would tear again, and give Sherburn another cussing. By-and-by somebody says: “Go for his daughter!—quick, go for his daughter; sometimes he’ll listen to her. If anybody can persuade him, she can.” So somebody started on a run. I walked down street a ways and stopped. In about five or ten minutes here comes Boggs again, but not on his horse. He was a-reeling across the street towards me, bare-headed, with a friend on both sides of him a-holt of his arms and hurrying him along. He was quiet, and looked uneasy; and he warn’t hanging back any, but was doing some of the hurrying himself. Somebody sings out: “Boggs!” I looked over there to see who said it, and it was that Colonel Sherburn. He was standing perfectly still in the street, and had a pistol raised in his right hand—not aiming it, but holding it out with the barrel tilted up towards the sky. The same second I see a young girl coming on the run, and two men with her. Boggs and the men turned round to see who called him, and when they see the pistol the men jumped to one side, and the pistol-barrel come down slow and steady to a level—both barrels cocked. Boggs throws up both of his hands and says, “O Lord, don’t shoot!” Bang! goes the first shot, and he staggers back, clawing at the air—bang! goes the second one, and he tumbles backwards onto the ground, heavy and solid, with his arms spread out. That young girl screamed out and comes rushing, and down she throws herself on her father, crying, and saying, “Oh, he’s killed him, he’s killed him!” The crowd closed up around them, and shouldered and jammed one another, with their necks stretched, trying to see, and people on the inside trying to shove them back and shouting, “Back, back! give him air, give him air!” Colonel Sherburn he tossed his pistol onto the ground, and turned around on his heels and walked off. They took Boggs to a little drug store, the crowd pressing around just the same, and the whole"
+}
