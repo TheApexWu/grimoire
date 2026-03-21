@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         for (let i = 0; i < texts.length; i++) {
           llmCalls.push(
             generateText({
-              model: google("gemini-2.0-flash"),
+              model: google("gemini-2.5-flash-lite"),
               prompt: voiceReadingPrompt(texts[i].text),
               temperature: 0.2,
               maxOutputTokens: 300,
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
         if (texts.length === 2) {
           llmCalls.push(
             generateText({
-              model: google("gemini-2.0-flash"),
+              model: google("gemini-2.5-flash-lite"),
               prompt: insightPrompt({
                 nameA: fingerprints[0].name,
                 nameB: fingerprints[1].name,

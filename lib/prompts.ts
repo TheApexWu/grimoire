@@ -124,7 +124,7 @@ export function judgePrompt(params: {
   textA: string;
   textB: string;
 }): string {
-  return `You are a literary forensics expert. Determine if these two texts were written by the same author.
+  return `You are a literary forensics expert. Were these two texts written by the same author?
 
 TEXT A:
 ---
@@ -136,14 +136,16 @@ TEXT B:
 ${params.textB.slice(0, 1500)}
 ---
 
-Analyze sentence structure, word choice, punctuation, and voice.
+Consider sentence structure, word choice, punctuation patterns, and voice.
 
-Return ONLY this JSON:
-{
-  "sameAuthor": true or false,
-  "confidence": 0.0 to 1.0,
-  "reasoning": "one sentence explanation"
-}`;
+You MUST respond with ONLY a JSON object, no other text before or after:
+{"sameAuthor": true, "confidence": 0.85, "reasoning": "Both texts share..."}
+
+Rules:
+- sameAuthor: boolean
+- confidence: number between 0.0 and 1.0
+- reasoning: one sentence
+- Output the JSON object and NOTHING else`;
 }
 
 /**

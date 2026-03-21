@@ -8,7 +8,12 @@ function parseVerdict(raw: string): {
   reasoning: string;
 } | null {
   try {
-    const cleaned = raw.replace(/```json\n?|\n?```/g, "").trim();
+    // Strip markdown fences
+    let cleaned = raw.replace(/```json\n?|\n?```/g, "").trim();
+    // Extract first JSON object if surrounded by other text
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+    cleaned = jsonMatch[0];
     const v = JSON.parse(cleaned);
     return {
       sameAuthor: v.sameAuthor ?? false,
@@ -33,16 +38,16 @@ export async function POST(request: Request) {
   // Run judge twice with swapped positions to cancel position bias
   const [run1, run2] = await Promise.all([
     generateText({
-      model: google("gemini-3.1-pro-preview"),
+      model: google("gemini-2.5-flash-lite"),
       prompt: judgePrompt({ textA: originalText, textB: generatedText }),
       temperature: 0.1,
-      maxOutputTokens: 200,
+      maxOutputTokens: 500,
     }),
     generateText({
-      model: google("gemini-3.1-pro-preview"),
+      model: google("gemini-2.5-flash-lite"),
       prompt: judgePrompt({ textA: generatedText, textB: originalText }),
       temperature: 0.1,
-      maxOutputTokens: 200,
+      maxOutputTokens: 500,
     }),
   ]);
 

@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const mimeType = image.type || "image/jpeg";
 
   const { text } = await generateText({
-    model: google("gemini-2.0-flash"),
+    model: google("gemini-2.5-flash"),
     messages: [
       {
         role: "user",

@@ -106,7 +106,7 @@ export async function POST(request: Request) {
               model: google("gemini-3.1-pro-preview"),
               prompt,
               temperature: temp,
-              maxOutputTokens: mode === "coach" ? 600 : 500,
+              maxOutputTokens: 4096,
             });
           });
 
@@ -149,6 +149,7 @@ export async function POST(request: Request) {
             bestText: best.text,
             candidates: roundResult.candidates,
             bestRadar: statFingerprintToRadar(best.fingerprint),
+            correction: previousCorrection || null,
           });
 
           // Adaptive stopping: if less than 5% improvement, plateau detected

@@ -80,7 +80,8 @@ export function compareFingerprints(
   target: StatFingerprint,
   candidate: StatFingerprint
 ): FingerprintComparison {
-  const ranges: Record<keyof StatFingerprint, [number, number]> = {
+  // Only metrics that are reliable on pasted text (no paragraph structure)
+  const ranges: Record<string, [number, number]> = {
     monosyllableRatio: [0.5, 1.0],
     sentenceMean: [5, 50],
     sentenceStd: [2, 30],
@@ -90,8 +91,7 @@ export function compareFingerprints(
     periodRate: [0, 3],
     lexicalDiversity: [0.3, 0.85],
     conjunctionDensity: [0, 3],
-    paragraphMean: [1, 15],
-    paragraphStd: [0, 8],
+    // paragraphMean/paragraphStd excluded: unreliable on pasted text without \n\n breaks
   };
 
   const distances: Record<string, number> = {};
@@ -101,8 +101,8 @@ export function compareFingerprints(
   for (const key of keys) {
     const [min, max] = ranges[key];
     const range = max - min;
-    const normTarget = (target[key] - min) / range;
-    const normCandidate = (candidate[key] - min) / range;
+    const normTarget = clamp01((target[key] - min) / range);
+    const normCandidate = clamp01((candidate[key] - min) / range);
     const dist = Math.abs(normTarget - normCandidate);
     distances[key] = Math.round(dist * 1000) / 1000;
     totalSquared += dist * dist;
@@ -164,10 +164,6 @@ export function statFingerprintToRadar(
     {
       label: "Conjunctions",
       value: clamp01(fp.conjunctionDensity / 3),
-    },
-    {
-      label: "Paragraph Length",
-      value: clamp01((fp.paragraphMean - 1) / 14),
     },
   ];
 }

@@ -73,6 +73,8 @@ interface CoachResponse {
   finalDistance: number;
   finalFingerprint: StatFingerprint;
   convergence: { round: number; distance: number }[];
+  convergedEarly?: boolean;
+  roundsCompleted?: number;
 }
 
 const library: FallbackAuthor[] = [hemingway, poe, twain] as FallbackAuthor[];
@@ -104,6 +106,7 @@ export default function Home() {
     { round: number; distance: number }[]
   >([]);
   const [coachPreviewText, setCoachPreviewText] = useState("");
+  const [coachCorrection, setCoachCorrection] = useState("");
   const [judgeVerdict, setJudgeVerdict] = useState<{
     sameAuthor: boolean;
     confidence: number;
@@ -282,6 +285,10 @@ export default function Home() {
           ]);
           setCoachPreviewText(data.bestText as string);
           setCoachRadar(data.bestRadar as RadarPoint[]);
+          if (data.correction) setCoachCorrection(data.correction as string);
+        },
+        "converged-early": () => {
+          // handled via done event
         },
         done: (data) => {
           setCoachResult({
@@ -290,6 +297,8 @@ export default function Home() {
             finalDistance: data.finalDistance as number,
             finalFingerprint: data.finalFingerprint as StatFingerprint,
             convergence: data.convergence as { round: number; distance: number }[],
+            convergedEarly: data.convergedEarly as boolean | undefined,
+            roundsCompleted: data.roundsCompleted as number | undefined,
           });
           setCoachRadar(data.finalRadar as RadarPoint[]);
           setView("coached");
@@ -331,6 +340,7 @@ export default function Home() {
     setDistance(null);
     setCoachResult(null);
     setCoachRadar([]);
+    setCoachCorrection("");
     setJudgeVerdict(null);
     setSaved(false);
     setError("");
@@ -440,14 +450,30 @@ export default function Home() {
         {/* ========== HOME ========== */}
         {view === "home" && (
           <div className="space-y-10">
-            <div className="text-center space-y-3 pt-4">
-              <h2 className="text-4xl font-bold tracking-tight">
-                Every writer has a shape you can see
+            <div className="text-center space-y-4 pt-6">
+              <h2 className="text-5xl font-bold tracking-tight leading-tight">
+                Every writer has a shape<br />you can see
               </h2>
-              <p className="text-zinc-400 max-w-xl mx-auto text-lg">
+              <p className="text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
                 Capture any writing voice. Study it side by side with your own.
                 Then let the agent coach your prose toward the style you want.
               </p>
+            </div>
+
+            {/* How it works */}
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { step: "01", title: "FINGERPRINT", desc: "11 statistical metrics extract the DNA of any writing voice. Instant, deterministic." },
+                { step: "02", title: "COMPARE", desc: "Overlaid radar charts + LLM voice readings reveal where two styles diverge." },
+                { step: "03", title: "COACH", desc: "3 rounds, 3 candidates per round. The agent rewrites toward the target, guided by metric-targeted corrections." },
+                { step: "04", title: "PROVE", desc: "A blind LLM judge reads both texts without labels. Same author? Statistical + perceptual proof." },
+              ].map((s) => (
+                <div key={s.step} className="border border-zinc-800/60 rounded-lg p-4 space-y-2">
+                  <div className="text-xs text-zinc-600 font-[family-name:var(--font-geist-mono)]">{s.step}</div>
+                  <div className="text-sm font-semibold text-zinc-200 font-[family-name:var(--font-geist-mono)]">{s.title}</div>
+                  <div className="text-xs text-zinc-500 leading-relaxed">{s.desc}</div>
+                </div>
+              ))}
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -500,7 +526,7 @@ export default function Home() {
                   {nameA} vs {nameB}
                 </h2>
                 <p className="text-zinc-500 text-sm mt-1">
-                  10-metric voice comparison
+                  statistical fingerprint + LLM voice reading
                 </p>
               </div>
               {distance !== null && (
@@ -674,6 +700,18 @@ export default function Home() {
               </div>
             )}
 
+            {/* Agent correction directive */}
+            {coachCorrection && (
+              <div className="border border-amber-900/30 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-amber-400/60 mb-2 font-[family-name:var(--font-geist-mono)]">
+                  AGENT CORRECTION APPLIED
+                </h3>
+                <div className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap font-[family-name:var(--font-geist-mono)]">
+                  {coachCorrection}
+                </div>
+              </div>
+            )}
+
             {/* Live radar morphing */}
             {coachRadar.length > 0 && radarB.length > 0 && (
               <div className="border border-zinc-800 rounded-lg p-6">
@@ -740,7 +778,12 @@ export default function Home() {
                   Your text, channeled toward {nameB}
                 </h2>
                 <p className="text-zinc-500 text-sm mt-1">
-                  {coachResult.results.length} rounds, 9 candidates total
+                  {coachResult.roundsCompleted || coachResult.results.length} round{(coachResult.roundsCompleted || coachResult.results.length) !== 1 ? "s" : ""}, {(coachResult.roundsCompleted || coachResult.results.length) * 3} candidates evaluated
+                  {coachResult.convergedEarly && (
+                    <span className="ml-2 text-green-400 font-[family-name:var(--font-geist-mono)]">
+                      CONVERGED EARLY
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="text-right">
@@ -969,10 +1012,19 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t border-zinc-800 px-6 py-3">
-        <div className="max-w-6xl mx-auto flex justify-between text-xs text-zinc-600 font-[family-name:var(--font-geist-mono)]">
-          <span>GRIMOIRE / Zero to Agent 2026</span>
-          <span>Capture any voice. Study it. Channel it.</span>
+      <footer className="border-t border-zinc-800 px-6 py-4">
+        <div className="max-w-6xl mx-auto space-y-2">
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {["Next.js 16", "Vercel AI SDK", "Gemini 3.1 Pro", "Gemini 2.0 Flash", "Recharts", "Supabase", "Clerk", "Eleven Labs"].map((t) => (
+              <span key={t} className="px-2 py-0.5 text-[10px] border border-zinc-800 rounded text-zinc-600 font-[family-name:var(--font-geist-mono)]">
+                {t}
+              </span>
+            ))}
+          </div>
+          <div className="flex justify-between text-xs text-zinc-600 font-[family-name:var(--font-geist-mono)]">
+            <span>GRIMOIRE / Zero to Agent 2026</span>
+            <span>Capture any voice. Study it. Channel it.</span>
+          </div>
         </div>
       </footer>
     </div>
@@ -1164,12 +1216,6 @@ function MetricList({
       value: fp.conjunctionDensity,
       max: 3,
       fmt: (v: number) => `${v.toFixed(2)}/sent`,
-    },
-    {
-      label: "Paragraph Length",
-      value: fp.paragraphMean,
-      max: 15,
-      fmt: (v: number) => `${v.toFixed(1)} sent/para`,
     },
   ];
 
