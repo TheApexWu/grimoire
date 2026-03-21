@@ -98,6 +98,11 @@ export default function Home() {
 
   const [coachResult, setCoachResult] = useState<CoachResponse | null>(null);
   const [coachRadar, setCoachRadar] = useState<RadarPoint[]>([]);
+  const [coachRound, setCoachRound] = useState(0);
+  const [coachConvergence, setCoachConvergence] = useState<
+    { round: number; distance: number }[]
+  >([]);
+  const [coachPreviewText, setCoachPreviewText] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -247,6 +252,9 @@ export default function Home() {
     setLoading(true);
     setCoachResult(null);
     setCoachRadar([]);
+    setCoachRound(0);
+    setCoachConvergence([]);
+    setCoachPreviewText("");
     setError("");
 
     try {
@@ -260,15 +268,56 @@ export default function Home() {
           rounds: 3,
         }),
       });
-      const data: CoachResponse = await res.json();
-      if (!res.ok)
-        throw new Error((data as unknown as { error: string }).error);
-      setCoachResult(data);
 
-      const fpRes = await fetchFingerprint(data.finalText);
-      setCoachRadar(fpRes.radar);
+      if (!res.ok || !res.body) {
+        throw new Error("Coach request failed");
+      }
 
-      setView("coached");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        let currentEvent = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) {
+            currentEvent = line.slice(7);
+          } else if (line.startsWith("data: ") && currentEvent) {
+            const data = JSON.parse(line.slice(6));
+
+            if (currentEvent === "round-start") {
+              setCoachRound(data.round);
+            } else if (currentEvent === "round-complete") {
+              setCoachConvergence((prev) => [
+                ...prev,
+                { round: data.round, distance: data.bestDistance },
+              ]);
+              setCoachPreviewText(data.bestText);
+              setCoachRadar(data.bestRadar);
+            } else if (currentEvent === "done") {
+              setCoachResult({
+                results: data.results,
+                finalText: data.finalText,
+                finalDistance: data.finalDistance,
+                finalFingerprint: data.finalFingerprint,
+                convergence: data.convergence,
+              });
+              setCoachRadar(data.finalRadar);
+              setView("coached");
+            } else if (currentEvent === "error") {
+              throw new Error(data.error);
+            }
+            currentEvent = "";
+          }
+        }
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Coach failed");
       setView("compare");
@@ -513,21 +562,68 @@ export default function Home() {
           </div>
         )}
 
-        {/* ========== COACHING ========== */}
+        {/* ========== COACHING (live) ========== */}
         {view === "coaching" && (
-          <div className="flex flex-col items-center justify-center py-24 space-y-6">
-            <div className="relative w-16 h-16">
-              <div className="absolute inset-0 border-2 border-zinc-700 rounded-full" />
-              <div className="absolute inset-0 border-2 border-white rounded-full border-t-transparent animate-spin" />
+          <div className="space-y-8 py-8">
+            <div className="flex items-center gap-4">
+              <div className="relative w-10 h-10">
+                <div className="absolute inset-0 border-2 border-zinc-700 rounded-full" />
+                <div className="absolute inset-0 border-2 border-white rounded-full border-t-transparent animate-spin" />
+              </div>
+              <div>
+                <p className="text-lg font-semibold">
+                  Style Coach Running
+                </p>
+                <p className="text-zinc-500 text-sm">
+                  Round {coachRound} of 3 &middot; 3 candidates per round
+                </p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-semibold">Style Coach Running</p>
-              <p className="text-zinc-500 text-sm mt-1 max-w-md">
-                Rewriting your text toward {nameB}&apos;s voice. 3 rounds of
-                refinement. 3 candidates per round, scored against the
-                fingerprint, best advances.
-              </p>
-            </div>
+
+            {/* Live convergence */}
+            {coachConvergence.length > 0 && (
+              <div className="border border-zinc-800 rounded-lg p-6">
+                <h3 className="text-sm font-semibold text-zinc-400 mb-3 font-[family-name:var(--font-geist-mono)]">
+                  LIVE CONVERGENCE
+                </h3>
+                <div className="space-y-2">
+                  {coachConvergence.map((c) => (
+                    <div
+                      key={c.round}
+                      className="flex items-center gap-3 text-sm"
+                    >
+                      <span className="text-zinc-600 font-[family-name:var(--font-geist-mono)] w-20">
+                        Round {c.round}
+                      </span>
+                      <div className="flex-1 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 rounded-full transition-all duration-700"
+                          style={{
+                            width: `${Math.max(5, (1 - c.distance) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="font-[family-name:var(--font-geist-mono)] text-green-400/80 w-16 text-right">
+                        {c.distance.toFixed(3)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Live preview */}
+            {coachPreviewText && (
+              <div className="border border-green-900/30 rounded-lg p-5">
+                <h3 className="text-sm font-semibold text-green-400/60 mb-2 font-[family-name:var(--font-geist-mono)]">
+                  LATEST BEST CANDIDATE
+                </h3>
+                <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap max-h-32 overflow-y-auto">
+                  {coachPreviewText.slice(0, 500)}
+                  {coachPreviewText.length > 500 ? "..." : ""}
+                </p>
+              </div>
+            )}
           </div>
         )}
 

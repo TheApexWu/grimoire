@@ -1,17 +1,12 @@
 import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
-import { computeStatFingerprint, compareFingerprints } from "@/lib/fingerprint";
+import {
+  computeStatFingerprint,
+  compareFingerprints,
+  statFingerprintToRadar,
+} from "@/lib/fingerprint";
 import type { StatFingerprint } from "@/lib/fingerprint";
 import { coachPrompt } from "@/lib/prompts";
-
-interface RoundResult {
-  round: number;
-  candidates: { text: string; distance: number }[];
-  bestText: string;
-  bestDistance: number;
-  gapAnalysis: string;
-  bestFingerprint: StatFingerprint;
-}
 
 export async function POST(request: Request) {
   const {
@@ -29,62 +24,119 @@ export async function POST(request: Request) {
   }
 
   const target: StatFingerprint = targetFingerprint;
-  const results: RoundResult[] = [];
-  let previousGapAnalysis: string | undefined;
+  const encoder = new TextEncoder();
 
-  for (let round = 1; round <= rounds; round++) {
-    const temperatures = [0.7, 0.9, 1.1];
-    const candidatePromises = temperatures.map((temp) =>
-      generateText({
-        model: google("gemini-2.0-flash"),
-        prompt: coachPrompt({
-          userText,
-          targetSample,
-          targetFingerprint: target,
-          gapAnalysis: previousGapAnalysis,
-          round,
-        }),
-        temperature: temp,
-        maxOutputTokens: 600,
-      })
-    );
-
-    const responses = await Promise.all(candidatePromises);
-
-    const scored = responses.map((r) => {
-      const candidateFp = computeStatFingerprint(r.text);
-      const comparison = compareFingerprints(target, candidateFp);
-      return {
-        text: r.text,
-        distance: comparison.totalDistance,
-        fingerprint: candidateFp,
-        gapAnalysis: comparison.gapAnalysis,
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) => {
+        controller.enqueue(
+          encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
+        );
       };
-    });
 
-    scored.sort((a, b) => a.distance - b.distance);
-    const best = scored[0];
+      try {
+        let previousGapAnalysis: string | undefined;
+        const allResults: {
+          round: number;
+          candidates: { text: string; distance: number }[];
+          bestText: string;
+          bestDistance: number;
+          gapAnalysis: string;
+          bestFingerprint: StatFingerprint;
+        }[] = [];
 
-    results.push({
-      round,
-      candidates: scored.map((s) => ({ text: s.text, distance: s.distance })),
-      bestText: best.text,
-      bestDistance: best.distance,
-      gapAnalysis: best.gapAnalysis,
-      bestFingerprint: best.fingerprint,
-    });
+        for (let round = 1; round <= rounds; round++) {
+          send("round-start", { round, total: rounds });
 
-    previousGapAnalysis = best.gapAnalysis;
-  }
+          const temperatures = [0.7, 0.9, 1.1];
+          const candidatePromises = temperatures.map((temp) =>
+            generateText({
+              model: google("gemini-2.0-flash"),
+              prompt: coachPrompt({
+                userText,
+                targetSample,
+                targetFingerprint: target,
+                gapAnalysis: previousGapAnalysis,
+                round,
+              }),
+              temperature: temp,
+              maxOutputTokens: 600,
+            })
+          );
 
-  return Response.json({
-    results,
-    finalText: results[results.length - 1].bestText,
-    finalDistance: results[results.length - 1].bestDistance,
-    finalFingerprint: results[results.length - 1].bestFingerprint,
-    convergence: results.map((r) => ({
-      round: r.round,
-      distance: r.bestDistance,
-    })),
+          const responses = await Promise.all(candidatePromises);
+
+          const scored = responses.map((r) => {
+            const candidateFp = computeStatFingerprint(r.text);
+            const comparison = compareFingerprints(target, candidateFp);
+            return {
+              text: r.text,
+              distance: comparison.totalDistance,
+              fingerprint: candidateFp,
+              gapAnalysis: comparison.gapAnalysis,
+            };
+          });
+
+          scored.sort((a, b) => a.distance - b.distance);
+          const best = scored[0];
+
+          const roundResult = {
+            round,
+            candidates: scored.map((s) => ({
+              text: s.text,
+              distance: s.distance,
+            })),
+            bestText: best.text,
+            bestDistance: best.distance,
+            gapAnalysis: best.gapAnalysis,
+            bestFingerprint: best.fingerprint,
+          };
+
+          allResults.push(roundResult);
+          previousGapAnalysis = best.gapAnalysis;
+
+          send("round-complete", {
+            round,
+            bestDistance: best.distance,
+            bestText: best.text,
+            candidates: roundResult.candidates,
+            bestRadar: statFingerprintToRadar(best.fingerprint),
+          });
+        }
+
+        const final = allResults[allResults.length - 1];
+        send("done", {
+          finalText: final.bestText,
+          finalDistance: final.bestDistance,
+          finalFingerprint: final.bestFingerprint,
+          finalRadar: statFingerprintToRadar(final.bestFingerprint),
+          convergence: allResults.map((r) => ({
+            round: r.round,
+            distance: r.bestDistance,
+          })),
+          results: allResults.map((r) => ({
+            round: r.round,
+            candidates: r.candidates,
+            bestText: r.bestText,
+            bestDistance: r.bestDistance,
+            bestFingerprint: r.bestFingerprint,
+          })),
+        });
+      } catch (err) {
+        send("error", {
+          error: err instanceof Error ? err.message : "Coach failed",
+        });
+      }
+
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
   });
 }
