@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const temperatures = [0.7, 0.9, 1.1];
     const candidatePromises = temperatures.map((temp) =>
       generateText({
-        model: google("gemini-2.0-flash"),
+        model: google("gemini-3.1-pro-preview"),
         prompt: generationPrompt({
           sampleText,
           targetFingerprint: target,

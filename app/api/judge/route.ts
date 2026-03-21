@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   }
 
   const { text } = await generateText({
-    model: google("gemini-2.0-flash"),
+    model: google("gemini-3.1-pro-preview"),
     prompt: judgePrompt({ textA: originalText, textB: generatedText }),
     temperature: 0.1,
     maxOutputTokens: 200,
