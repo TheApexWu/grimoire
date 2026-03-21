@@ -4,6 +4,9 @@ import { lazy, Suspense } from "react";
 import hemingway from "@/data/library/hemingway.json";
 import poe from "@/data/library/poe.json";
 import twain from "@/data/library/twain.json";
+import kafka from "@/data/library/kafka.json";
+import woolf from "@/data/library/woolf.json";
+import fitzgerald from "@/data/library/fitzgerald.json";
 import { computeUniformityScore } from "@/components/VoiceShape";
 
 const VoiceShape = lazy(() => import("@/components/VoiceShape"));
@@ -12,6 +15,9 @@ const authors = [
   { data: hemingway, color: "#f59e0b" },
   { data: poe, color: "#8b5cf6" },
   { data: twain, color: "#3b82f6" },
+  { data: kafka, color: "#ef4444" },
+  { data: woolf, color: "#ec4899" },
+  { data: fitzgerald, color: "#22c55e" },
 ];
 
 export default function ShapesPage() {
@@ -30,7 +36,7 @@ export default function ShapesPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-3 gap-6">
           {authors.map(({ data, color }) => {
             const radarValues = data.radar.map((r: { value: number }) => r.value);
             const score = computeUniformityScore(radarValues);

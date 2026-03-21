@@ -1,0 +1,55 @@
+{
+  "id": "fitzgerald",
+  "name": "F. Scott Fitzgerald",
+  "work": "The Great Gatsby",
+  "stats": {
+    "monosyllableRatio": 0.7200112107623319,
+    "sentenceMean": 20.39,
+    "sentenceStd": 15.26,
+    "sentenceSkew": 0.69,
+    "commaRate": 1.24,
+    "semicolonRate": 0.04,
+    "periodRate": 0.897,
+    "lexicalDiversity": 0.739,
+    "conjunctionDensity": 0.794,
+    "paragraphMean": 2.6,
+    "paragraphStd": 1.67
+  },
+  "radar": [
+    {
+      "label": "Monosyllable %",
+      "value": 0.44002242152466375
+    },
+    {
+      "label": "Sentence Length",
+      "value": 0.342
+    },
+    {
+      "label": "Sentence Variation",
+      "value": 0.4735714285714286
+    },
+    {
+      "label": "Comma Density",
+      "value": 0.248
+    },
+    {
+      "label": "Semicolons",
+      "value": 0.04
+    },
+    {
+      "label": "Lexical Diversity",
+      "value": 0.7981818181818181
+    },
+    {
+      "label": "Conjunctions",
+      "value": 0.26466666666666666
+    }
+  ],
+  "voice": {
+    "emotionalTemperature": "gilded melancholy",
+    "sensoryPalette": "visual-chromatic, color and surfaces",
+    "tonalRegister": "elegant-wistful",
+    "imageryDensity": "high ornamental, beauty as decay"
+  },
+  "sampleText": "” “Has it?” When he realized what I was talking about, that there were twinkle-bells of sunshine in the room, he smiled like a weather man, like an ecstatic patron of recurrent light, and repeated the news to Daisy. “What do you think of that? It’s stopped raining.” “I’m glad, Jay.” Her throat, full of aching, grieving beauty, told only of her unexpected joy. “I want you and Daisy to come over to my house,” he said, “I’d like to show her around.” “You’re sure you want me to come?” “Absolutely, old sport.” Daisy went upstairs to wash her face—too late I thought with humiliation of my towels—while Gatsby and I waited on the lawn. “My house looks well, doesn’t it?” he demanded. “See how the whole front of it catches the light.” I agreed that it was splendid. “Yes.” His eyes went over it, every arched door and square tower. “It took me just three years to earn the money that bought it.” “I thought you inherited your money.” “I did, old sport,” he said automatically, “but I lost most of it in the big panic—the panic of the war.” I think he hardly knew what he was saying, for when I asked him what business he was in he answered: “That’s my affair,” before he realized that it wasn’t an appropriate reply. “Oh, I’ve been in several things,” he corrected himself. “I was in the drug business and then I was in the oil business. But I’m not in either one now.” He looked at me with more attention. “Do you mean you’ve been thinking over what I proposed the other night?” Before I could answer, Daisy came out of the house and two rows of brass buttons on her dress gleamed in the sunlight. “That huge place there?” she cried pointing. “Do you like it?” “I love it, but I don’t see how you live there all alone.” “I keep it always full of interesting people, night and day. People who do interesting things. Celebrated people.” Instead of taking the shortcut along the Sound we went down to the road and entered by the big postern. With enchanting murmurs Daisy admired this aspect or that of the feudal silhouette against the sky, admired the gardens, the sparkling odour of jonquils and the frothy odour of hawthorn and plum blossoms and the pale gold odour of kiss-me-at-the-gate. It was strange to reach the marble steps and find no stir of bright dresses in and out the door, and hear no sound but bird voices in the trees. And inside, as we wandered through Marie Antoinette music-rooms and Restoration Salons, I felt that there were guests concealed behind every couch and table, under orders to be breathlessly silent until we had passed through. As Gatsby closed the door of “the Merton College Library” I could have sworn I heard the owl-eyed man break into ghostly laughter. We went upstairs, through period bedrooms swathed in rose and lavender silk and"
+}

@@ -8,7 +8,7 @@ import { computeStatFingerprint, statFingerprintToRadar } from "../lib/fingerpri
 import type { VoiceReading } from "../lib/fingerprint";
 
 const CORPUS_DIR = path.join(__dirname, "..", "corpus");
-const OUTPUT_DIR = path.join(__dirname, "..", "data", "fallbacks");
+const OUTPUT_DIR = path.join(__dirname, "..", "data", "library");
 
 // Pre-written voice readings (since we can't call LLM in a script without API key)
 const voiceReadings: Record<string, VoiceReading> = {
@@ -30,6 +30,24 @@ const voiceReadings: Record<string, VoiceReading> = {
     tonalRegister: "casual-ironic",
     imageryDensity: "high concrete, physical world dominant",
   },
+  kafka: {
+    emotionalTemperature: "suffocating bureaucratic anxiety",
+    sensoryPalette: "interior-claustrophobic, body and enclosure",
+    tonalRegister: "formal-detached",
+    imageryDensity: "high surreal, ordinary made grotesque",
+  },
+  woolf: {
+    emotionalTemperature: "luminous interior drift",
+    sensoryPalette: "visual-temporal, light and memory",
+    tonalRegister: "lyrical-interior",
+    imageryDensity: "high impressionistic, thought over object",
+  },
+  fitzgerald: {
+    emotionalTemperature: "gilded melancholy",
+    sensoryPalette: "visual-chromatic, color and surfaces",
+    tonalRegister: "elegant-wistful",
+    imageryDensity: "high ornamental, beauty as decay",
+  },
 };
 
 const AUTHORS = [
@@ -50,6 +68,24 @@ const AUTHORS = [
     name: "Mark Twain",
     file: "twain_huckfinn.txt",
     work: "Adventures of Huckleberry Finn",
+  },
+  {
+    id: "kafka",
+    name: "Franz Kafka",
+    file: "kafka_metamorphosis.txt",
+    work: "The Metamorphosis",
+  },
+  {
+    id: "woolf",
+    name: "Virginia Woolf",
+    file: "woolf_voyageout.txt",
+    work: "The Voyage Out",
+  },
+  {
+    id: "fitzgerald",
+    name: "F. Scott Fitzgerald",
+    file: "fitzgerald_gatsby.txt",
+    work: "The Great Gatsby",
   },
 ];
 
@@ -89,6 +125,10 @@ fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
 for (const author of AUTHORS) {
   const filePath = path.join(CORPUS_DIR, author.file);
+  if (!fs.existsSync(filePath)) {
+    console.log(`Skipping ${author.name}: corpus file not found`);
+    continue;
+  }
   const raw = fs.readFileSync(filePath, "utf-8");
   const clean = stripGutenbergHeader(raw);
 

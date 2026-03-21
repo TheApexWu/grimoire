@@ -1,0 +1,55 @@
+{
+  "id": "woolf",
+  "name": "Virginia Woolf",
+  "work": "The Voyage Out",
+  "stats": {
+    "monosyllableRatio": 0.7213067360508818,
+    "sentenceMean": 13.89,
+    "sentenceStd": 13.16,
+    "sentenceSkew": 1.44,
+    "commaRate": 1.137,
+    "semicolonRate": 0.137,
+    "periodRate": 0.928,
+    "lexicalDiversity": 0.747,
+    "conjunctionDensity": 0.486,
+    "paragraphMean": 3.41,
+    "paragraphStd": 3.39
+  },
+  "radar": [
+    {
+      "label": "Monosyllable %",
+      "value": 0.4426134721017636
+    },
+    {
+      "label": "Sentence Length",
+      "value": 0.19755555555555557
+    },
+    {
+      "label": "Sentence Variation",
+      "value": 0.3985714285714286
+    },
+    {
+      "label": "Comma Density",
+      "value": 0.2274
+    },
+    {
+      "label": "Semicolons",
+      "value": 0.137
+    },
+    {
+      "label": "Lexical Diversity",
+      "value": 0.8127272727272726
+    },
+    {
+      "label": "Conjunctions",
+      "value": 0.162
+    }
+  ],
+  "voice": {
+    "emotionalTemperature": "luminous interior drift",
+    "sensoryPalette": "visual-temporal, light and memory",
+    "tonalRegister": "lyrical-interior",
+    "imageryDensity": "high impressionistic, thought over object"
+  },
+  "sampleText": " Yes, there lay Willoughby, curt, inexpressive, perpetually jocular, robbing a whole continent of mystery, enquiring after his daughter’s manners and morals—hoping she wasn’t a bore, and bidding them pack her off to him on board the very next ship if she were—and then grateful and affectionate with suppressed emotion, and then half a page about his own triumphs over wretched little natives who went on strike and refused to load his ships, until he roared English oaths at them, “popping my head out of the window just as I was, in my shirt sleeves. The beggars had the sense to scatter.” “If Theresa married Willoughby,” she remarked, turning the page with a hairpin, “one doesn’t see what’s to prevent Rachel—” But Ridley was now off on grievances of his own connected with the washing of his shirts, which somehow led to the frequent visits of Hughling Elliot, who was a bore, a pedant, a dry stick of a man, and yet Ridley couldn’t simply point at the door and tell him to go. The truth of it was, they saw too many people. And so on and so on, more conjugal talk pattering softly and unintelligibly, until they were both ready to go down to tea. The first thing that caught Helen’s eye as she came downstairs was a carriage at the door, filled with skirts and feathers nodding on the tops of hats. She had only time to gain the drawing-room before two names were oddly mispronounced by the Spanish maid, and Mrs. Thornbury came in slightly in advance of Mrs. Wilfrid Flushing. “Mrs. Wilfrid Flushing,” said Mrs. Thornbury, with a wave of her hand. “A friend of our common friend Mrs. Raymond Parry.” Mrs. Flushing shook hands energetically. She was a woman of forty perhaps, very well set up and erect, splendidly robust, though not as tall as the upright carriage of her body made her appear. She looked Helen straight in the face and said, “You have a charmin’ house.” She had a strongly marked face, her eyes looked straight at you, and though naturally she was imperious in her manner she was nervous at the same time. Mrs. Thornbury acted as interpreter, making things smooth all round by a series of charming commonplace remarks. “I’ve taken it upon myself, Mr. Ambrose,” she said, “to promise that you will be so kind as to give Mrs. Flushing the benefit of your experience. I’m sure no one here knows the country as well as you do. No one takes such wonderful long walks. No one, I’m sure, has your encyclopaedic knowledge upon every subject. Mr. Wilfrid Flushing is a collector. He has discovered really beautiful things already. I had no notion that the peasants were so artistic—though of course in the past—” “Not old things—new things,” interrupted Mrs. Flushing curtly. “That is, if he takes my advice.” The Ambroses had not lived for many years in London without knowing something of a good many people, by name"
+}

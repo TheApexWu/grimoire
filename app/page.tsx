@@ -23,6 +23,9 @@ const VoiceShape = lazy(() => import("@/components/VoiceShape"));
 import hemingway from "@/data/library/hemingway.json";
 import poe from "@/data/library/poe.json";
 import twain from "@/data/library/twain.json";
+import kafka from "@/data/library/kafka.json";
+import woolf from "@/data/library/woolf.json";
+import fitzgerald from "@/data/library/fitzgerald.json";
 
 // --- Types ---
 
@@ -80,7 +83,7 @@ interface CoachResponse {
   roundsCompleted?: number;
 }
 
-const library: FallbackAuthor[] = [hemingway, poe, twain] as FallbackAuthor[];
+const library: FallbackAuthor[] = [hemingway, poe, twain, kafka, woolf, fitzgerald] as FallbackAuthor[];
 
 type View = "home" | "diagnose" | "compare" | "coaching" | "coached";
 
@@ -924,45 +927,29 @@ export default function Home() {
               </div>
             )}
 
-            {/* Live radar morphing */}
+            {/* Live 3D shape morphing */}
             {coachRadar.length > 0 && radarB.length > 0 && (
-              <div className="border border-zinc-800 rounded-lg p-6">
-                <h3 className="text-sm font-semibold text-zinc-400 mb-2 font-[family-name:var(--font-geist-mono)]">
-                  VOICE SHAPE (morphing toward target)
-                </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <RadarChart
-                    data={radarB.map((b, i) => ({
-                      label: b.label,
-                      Target: b.value,
-                      Current: coachRadar[i]?.value ?? 0,
-                    }))}
-                  >
-                    <PolarGrid stroke="#333" />
-                    <PolarAngleAxis
-                      dataKey="label"
-                      tick={{ fill: "#999", fontSize: 11 }}
-                    />
-                    <Radar
-                      name="Target"
-                      dataKey="Target"
-                      stroke="#3b82f6"
-                      fill="#3b82f6"
-                      fillOpacity={0.05}
-                      strokeWidth={1.5}
-                      strokeDasharray="4 4"
-                    />
-                    <Radar
-                      name="Current"
-                      dataKey="Current"
-                      stroke="#22c55e"
-                      fill="#22c55e"
-                      fillOpacity={0.15}
-                      strokeWidth={2.5}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 12, color: "#888" }} />
-                  </RadarChart>
-                </ResponsiveContainer>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border border-zinc-800 rounded-lg p-4">
+                  <h3 className="text-xs font-semibold text-blue-400/60 mb-1 font-[family-name:var(--font-geist-mono)]">
+                    TARGET SHAPE
+                  </h3>
+                  <div style={{ height: 280 }}>
+                    <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
+                      <VoiceShape values={radarB.map(r => r.value)} color="#3b82f6" label={nameB} />
+                    </Suspense>
+                  </div>
+                </div>
+                <div className="border border-green-900/40 rounded-lg p-4">
+                  <h3 className="text-xs font-semibold text-green-400/60 mb-1 font-[family-name:var(--font-geist-mono)]">
+                    CURRENT (morphing)
+                  </h3>
+                  <div style={{ height: 280 }}>
+                    <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
+                      <VoiceShape values={coachRadar.map(r => r.value)} color="#22c55e" label="Current" />
+                    </Suspense>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1008,54 +995,38 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Triple radar */}
-            <div className="border border-zinc-800 rounded-lg p-6">
-              <h3 className="text-sm font-semibold text-zinc-400 mb-2 font-[family-name:var(--font-geist-mono)]">
-                CONVERGENCE MAP
-              </h3>
-              <ResponsiveContainer width="100%" height={380}>
-                <RadarChart
-                  data={radarA.map((a, i) => ({
-                    label: a.label,
-                    [nameA]: a.value,
-                    [nameB]: radarB[i]?.value ?? 0,
-                    Coached: coachRadar[i]?.value ?? 0,
-                  }))}
-                >
-                  <PolarGrid stroke="#333" />
-                  <PolarAngleAxis
-                    dataKey="label"
-                    tick={{ fill: "#999", fontSize: 11 }}
-                  />
-                  <Radar
-                    name={nameA}
-                    dataKey={nameA}
-                    stroke="#f59e0b"
-                    fill="#f59e0b"
-                    fillOpacity={0.05}
-                    strokeWidth={1.5}
-                    strokeDasharray="4 4"
-                  />
-                  <Radar
-                    name={nameB}
-                    dataKey={nameB}
-                    stroke="#3b82f6"
-                    fill="#3b82f6"
-                    fillOpacity={0.05}
-                    strokeWidth={1.5}
-                    strokeDasharray="4 4"
-                  />
-                  <Radar
-                    name="Coached"
-                    dataKey="Coached"
-                    stroke="#22c55e"
-                    fill="#22c55e"
-                    fillOpacity={0.15}
-                    strokeWidth={2.5}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12, color: "#888" }} />
-                </RadarChart>
-              </ResponsiveContainer>
+            {/* 3D Shape Convergence: Before / Coached / Target */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="border border-amber-900/40 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-amber-400/60 mb-1 font-[family-name:var(--font-geist-mono)] text-center">
+                  YOUR ORIGINAL
+                </h3>
+                <div style={{ height: 300 }}>
+                  <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
+                    <VoiceShape values={radarA.map(r => r.value)} color="#f59e0b" label={nameA} />
+                  </Suspense>
+                </div>
+              </div>
+              <div className="border border-green-800/60 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-green-400/80 mb-1 font-[family-name:var(--font-geist-mono)] text-center">
+                  COACHED
+                </h3>
+                <div style={{ height: 300 }}>
+                  <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
+                    <VoiceShape values={coachRadar.map(r => r.value)} color="#22c55e" label="Coached" />
+                  </Suspense>
+                </div>
+              </div>
+              <div className="border border-blue-900/40 rounded-lg p-4">
+                <h3 className="text-xs font-semibold text-blue-400/60 mb-1 font-[family-name:var(--font-geist-mono)] text-center">
+                  TARGET
+                </h3>
+                <div style={{ height: 300 }}>
+                  <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-700">Loading...</div>}>
+                    <VoiceShape values={radarB.map(r => r.value)} color="#3b82f6" label={nameB} />
+                  </Suspense>
+                </div>
+              </div>
             </div>
 
             {/* Convergence line */}

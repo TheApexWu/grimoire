@@ -1,0 +1,55 @@
+{
+  "id": "kafka",
+  "name": "Franz Kafka",
+  "work": "The Metamorphosis",
+  "stats": {
+    "monosyllableRatio": 0.7645186953062848,
+    "sentenceMean": 22.85,
+    "sentenceStd": 16.1,
+    "sentenceSkew": 1.4,
+    "commaRate": 1.218,
+    "semicolonRate": 0.164,
+    "periodRate": 0.824,
+    "lexicalDiversity": 0.712,
+    "conjunctionDensity": 0.988,
+    "paragraphMean": 7.39,
+    "paragraphStd": 6.26
+  },
+  "radar": [
+    {
+      "label": "Monosyllable %",
+      "value": 0.5290373906125696
+    },
+    {
+      "label": "Sentence Length",
+      "value": 0.3966666666666667
+    },
+    {
+      "label": "Sentence Variation",
+      "value": 0.5035714285714287
+    },
+    {
+      "label": "Comma Density",
+      "value": 0.24359999999999998
+    },
+    {
+      "label": "Semicolons",
+      "value": 0.164
+    },
+    {
+      "label": "Lexical Diversity",
+      "value": 0.749090909090909
+    },
+    {
+      "label": "Conjunctions",
+      "value": 0.3293333333333333
+    }
+  ],
+  "voice": {
+    "emotionalTemperature": "suffocating bureaucratic anxiety",
+    "sensoryPalette": "interior-claustrophobic, body and enclosure",
+    "tonalRegister": "formal-detached",
+    "imageryDensity": "high surreal, ordinary made grotesque"
+  },
+  "sampleText": " No sooner had she come in than she would quickly close the door as a precaution so that no-one would have to suffer the view into Gregor’s room, then she would go straight to the window and pull it hurriedly open almost as if she were suffocating. Even if it was cold, she would stay at the window breathing deeply for a little while. She would alarm Gregor twice a day with this running about and noise making; he would stay under the couch shivering the whole while, knowing full well that she would certainly have liked to spare him this ordeal, but it was impossible for her to be in the same room with him with the windows closed. One day, about a month after Gregor’s transformation when his sister no longer had any particular reason to be shocked at his appearance, she came into the room a little earlier than usual and found him still staring out the window, motionless, and just where he would be most horrible. In itself, his sister’s not coming into the room would have been no surprise for Gregor as it would have been difficult for her to immediately open the window while he was still there, but not only did she not come in, she went straight back and closed the door behind her, a stranger would have thought he had threatened her and tried to bite her. Gregor went straight to hide himself under the couch, of course, but he had to wait until midday before his sister came back and she seemed much more uneasy than usual. It made him realise that she still found his appearance unbearable and would continue to do so, she probably even had to overcome the urge to flee when she saw the little bit of him that protruded from under the couch. One day, in order to spare her even this sight, he spent four hours carrying the bedsheet over to the couch on his back and arranged it so that he was completely covered and his sister would not be able to see him even if she bent down. If she did not think this sheet was necessary then all she had to do was take it off again, as it was clear enough that it was no pleasure for Gregor to cut himself off so completely. She left the sheet where it was. Gregor even thought he glimpsed a look of gratitude one time when he carefully looked out from under the sheet to see how his sister liked the new arrangement. For the first fourteen days, Gregor’s parents could not bring themselves to come into the room to see him. He would often hear them say how they appreciated all the new work his sister was doing even though, before, they had seen her as a girl who was somewhat useless and frequently been annoyed with her. But now the two of them, father and mother, would often both wait"
+}
