@@ -103,6 +103,11 @@ export default function Home() {
     { round: number; distance: number }[]
   >([]);
   const [coachPreviewText, setCoachPreviewText] = useState("");
+  const [judgeVerdict, setJudgeVerdict] = useState<{
+    sameAuthor: boolean;
+    confidence: number;
+    reasoning: string;
+  } | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -255,6 +260,7 @@ export default function Home() {
     setCoachRound(0);
     setCoachConvergence([]);
     setCoachPreviewText("");
+    setJudgeVerdict(null);
     setError("");
 
     try {
@@ -311,6 +317,18 @@ export default function Home() {
               });
               setCoachRadar(data.finalRadar);
               setView("coached");
+              // Fire judge in background (non-blocking)
+              fetch("/api/judge", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  originalText: textB,
+                  generatedText: data.finalText,
+                }),
+              })
+                .then((r) => r.json())
+                .then((v) => setJudgeVerdict(v))
+                .catch(() => {});
             } else if (currentEvent === "error") {
               throw new Error(data.error);
             }
@@ -342,6 +360,7 @@ export default function Home() {
     setDistance(null);
     setCoachResult(null);
     setCoachRadar([]);
+    setJudgeVerdict(null);
     setError("");
   }, []);
 
@@ -612,6 +631,48 @@ export default function Home() {
               </div>
             )}
 
+            {/* Live radar morphing */}
+            {coachRadar.length > 0 && radarB.length > 0 && (
+              <div className="border border-zinc-800 rounded-lg p-6">
+                <h3 className="text-sm font-semibold text-zinc-400 mb-2 font-[family-name:var(--font-geist-mono)]">
+                  VOICE SHAPE (morphing toward target)
+                </h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <RadarChart
+                    data={radarB.map((b, i) => ({
+                      label: b.label,
+                      Target: b.value,
+                      Current: coachRadar[i]?.value ?? 0,
+                    }))}
+                  >
+                    <PolarGrid stroke="#333" />
+                    <PolarAngleAxis
+                      dataKey="label"
+                      tick={{ fill: "#999", fontSize: 11 }}
+                    />
+                    <Radar
+                      name="Target"
+                      dataKey="Target"
+                      stroke="#3b82f6"
+                      fill="#3b82f6"
+                      fillOpacity={0.05}
+                      strokeWidth={1.5}
+                      strokeDasharray="4 4"
+                    />
+                    <Radar
+                      name="Current"
+                      dataKey="Current"
+                      stroke="#22c55e"
+                      fill="#22c55e"
+                      fillOpacity={0.15}
+                      strokeWidth={2.5}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12, color: "#888" }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
             {/* Live preview */}
             {coachPreviewText && (
               <div className="border border-green-900/30 rounded-lg p-5">
@@ -785,6 +846,43 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
+            {/* LLM Judge Verdict */}
+            {judgeVerdict && (
+              <div className="border border-zinc-800 rounded-lg p-6">
+                <h3 className="text-sm font-semibold text-zinc-400 mb-3 font-[family-name:var(--font-geist-mono)]">
+                  BLIND JUDGE VERDICT
+                </h3>
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`text-4xl font-bold font-[family-name:var(--font-geist-mono)] ${
+                      judgeVerdict.sameAuthor
+                        ? "text-green-400"
+                        : "text-red-400"
+                    }`}
+                  >
+                    {judgeVerdict.sameAuthor ? "PASS" : "FAIL"}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-zinc-300">
+                      {judgeVerdict.reasoning}
+                    </div>
+                    <div className="text-xs text-zinc-600 mt-1 font-[family-name:var(--font-geist-mono)]">
+                      Confidence: {(judgeVerdict.confidence * 100).toFixed(0)}%
+                    </div>
+                  </div>
+                </div>
+                <p className="text-xs text-zinc-600 mt-3">
+                  An LLM was shown the coached output and the target sample
+                  without labels, then asked: &quot;same author?&quot;
+                </p>
+              </div>
+            )}
+            {!judgeVerdict && view === "coached" && (
+              <div className="border border-zinc-800 rounded-lg p-4 text-center text-sm text-zinc-600">
+                Running blind judge test...
+              </div>
+            )}
 
             <button
               onClick={reset}
