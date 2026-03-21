@@ -66,10 +66,10 @@ RULES:
 - Output ONLY the rewritten text. No commentary.`;
 
   if (round > 1 && gapAnalysis) {
-    prompt += `\n\nGAP ANALYSIS FROM PREVIOUS ATTEMPT (round ${round}):
+    prompt += `\n\nMETRIC CORRECTION (round ${round} - HIGHEST PRIORITY):
 ${gapAnalysis}
 
-Adjust specifically to close these gaps.`;
+These are measured deviations from the target. Fix these FIRST before anything else.`;
   }
 
   return prompt;
@@ -111,7 +111,7 @@ ${topicLine}
 Match rhythm, punctuation, vocabulary exactly. No parody. Output ONLY the text.`;
 
   if (round > 1 && gapAnalysis) {
-    prompt += `\n\nGAP ANALYSIS (round ${round}):\n${gapAnalysis}\n\nClose these gaps. Highest priority.`;
+    prompt += `\n\nMETRIC CORRECTION (round ${round} - HIGHEST PRIORITY):\n${gapAnalysis}\n\nThese are measured deviations from the target. Fix these FIRST.`;
   }
 
   return prompt;

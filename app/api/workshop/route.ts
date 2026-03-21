@@ -4,6 +4,7 @@ import {
   computeStatFingerprint,
   compareFingerprints,
   statFingerprintToRadar,
+  metricCorrectionDirective,
 } from "@/lib/fingerprint";
 import type { StatFingerprint } from "@/lib/fingerprint";
 import { coachPrompt, generationPrompt } from "@/lib/prompts";
@@ -67,7 +68,9 @@ export async function POST(request: Request) {
       };
 
       try {
-        let previousGapAnalysis: string | undefined;
+        let previousCorrection: string | undefined;
+        let previousBestDistance = Infinity;
+        let convergedEarly = false;
         const allResults: {
           round: number;
           candidates: { text: string; distance: number }[];
@@ -88,14 +91,14 @@ export async function POST(request: Request) {
                     userText: (body as CoachInput).userText,
                     targetSample: (body as CoachInput).targetSample,
                     targetFingerprint: target,
-                    gapAnalysis: previousGapAnalysis,
+                    gapAnalysis: previousCorrection,
                     round,
                   })
                 : generationPrompt({
                     sampleText: (body as GenerateInput).sampleText,
                     targetFingerprint: target,
                     topic: (body as GenerateInput).topic,
-                    gapAnalysis: previousGapAnalysis,
+                    gapAnalysis: previousCorrection,
                     round,
                   });
 
@@ -136,7 +139,9 @@ export async function POST(request: Request) {
           };
 
           allResults.push(roundResult);
-          previousGapAnalysis = best.gapAnalysis;
+
+          // Metric-targeted correction: specific writing instructions instead of raw gaps
+          previousCorrection = metricCorrectionDirective(target, best.fingerprint);
 
           send("round-complete", {
             round,
@@ -145,11 +150,26 @@ export async function POST(request: Request) {
             candidates: roundResult.candidates,
             bestRadar: statFingerprintToRadar(best.fingerprint),
           });
+
+          // Adaptive stopping: if less than 5% improvement, plateau detected
+          if (round > 1 && best.distance >= previousBestDistance * 0.95) {
+            convergedEarly = true;
+            send("converged-early", {
+              round,
+              reason: "plateau",
+              distance: best.distance,
+              previousDistance: previousBestDistance,
+            });
+            break;
+          }
+          previousBestDistance = best.distance;
         }
 
         const final = allResults[allResults.length - 1];
         send("done", {
           mode,
+          convergedEarly,
+          roundsCompleted: allResults.length,
           finalText: final.bestText,
           finalDistance: final.bestDistance,
           finalFingerprint: final.bestFingerprint,

@@ -175,3 +175,79 @@ export function statFingerprintToRadar(
 function clamp01(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
+
+/**
+ * Metric-targeted correction: find the worst metric and return
+ * a specific, actionable writing instruction to fix it.
+ */
+const METRIC_ADVICE: Record<
+  string,
+  { high: string; low: string; label: string }
+> = {
+  monosyllableRatio: {
+    label: "Monosyllable ratio",
+    low: "Use shorter, simpler words. Replace polysyllabic words with one-syllable alternatives (e.g. 'got' not 'obtained', 'big' not 'enormous', 'end' not 'terminate').",
+    high: "Use more complex, multi-syllable vocabulary. Replace simple words with richer alternatives (e.g. 'illuminate' not 'light', 'contemplate' not 'think').",
+  },
+  sentenceMean: {
+    label: "Sentence length",
+    low: "Write longer sentences. Combine short clauses with commas, semicolons, and conjunctions into flowing compound sentences.",
+    high: "Break long sentences into shorter ones. Use more periods. Let single ideas stand alone.",
+  },
+  sentenceStd: {
+    label: "Sentence variation",
+    low: "Vary sentence lengths dramatically. Alternate between very short punchy sentences and longer flowing ones.",
+    high: "Make sentence lengths more uniform. Aim for consistent rhythm rather than dramatic variation.",
+  },
+  commaRate: {
+    label: "Comma density",
+    low: "Use more commas. Add subordinate clauses, appositives, and inline lists to create more pauses.",
+    high: "Reduce commas. Simplify sentence structure. Remove unnecessary subordinate clauses.",
+  },
+  semicolonRate: {
+    label: "Semicolon usage",
+    low: "Use semicolons to join closely related independent clauses instead of periods.",
+    high: "Replace semicolons with periods or restructure as single sentences.",
+  },
+  lexicalDiversity: {
+    label: "Vocabulary variety",
+    low: "Use more varied vocabulary. Find synonyms instead of repeating the same words.",
+    high: "Repeat key words intentionally. Use a narrower, more focused vocabulary.",
+  },
+  conjunctionDensity: {
+    label: "Conjunction frequency",
+    low: "Use more conjunctions (and, but, or, yet) to connect clauses within sentences.",
+    high: "Reduce conjunctions. Use periods to separate ideas instead of chaining with 'and' or 'but'.",
+  },
+};
+
+export function metricCorrectionDirective(
+  target: StatFingerprint,
+  candidate: StatFingerprint
+): string {
+  const comparison = compareFingerprints(target, candidate);
+  const sorted = Object.entries(comparison.distances).sort(
+    ([, a], [, b]) => b - a
+  );
+
+  const directives: string[] = [];
+  const top = sorted.slice(0, 2);
+
+  for (const [metric, dist] of top) {
+    if (dist < 0.05) continue;
+    const advice = METRIC_ADVICE[metric];
+    if (!advice) continue;
+
+    const tVal = target[metric as keyof StatFingerprint];
+    const cVal = candidate[metric as keyof StatFingerprint];
+    const direction = cVal > tVal ? "high" : "low";
+    const pct = (dist * 100).toFixed(0);
+
+    directives.push(
+      `PRIORITY FIX - ${advice.label} (${pct}% off target): yours=${typeof cVal === "number" ? cVal.toFixed(2) : cVal}, target=${typeof tVal === "number" ? tVal.toFixed(2) : tVal}. ${advice[direction]}`
+    );
+  }
+
+  if (directives.length === 0) return "Metrics are close. Maintain current style.";
+  return directives.join("\n\n");
+}
