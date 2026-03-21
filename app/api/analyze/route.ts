@@ -1,5 +1,5 @@
-import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
+import { flashLite, SAFETY_OFF } from "@/lib/gemini";
 import {
   computeStatFingerprint,
   statFingerprintToRadar,
@@ -69,7 +69,8 @@ export async function POST(request: Request) {
         for (let i = 0; i < texts.length; i++) {
           llmCalls.push(
             generateText({
-              model: google("gemini-2.5-flash-lite"),
+              model: flashLite,
+              providerOptions: SAFETY_OFF,
               prompt: voiceReadingPrompt(texts[i].text),
               temperature: 0.2,
               maxOutputTokens: 300,
@@ -101,7 +102,8 @@ export async function POST(request: Request) {
         if (texts.length === 2) {
           llmCalls.push(
             generateText({
-              model: google("gemini-2.5-flash-lite"),
+              model: flashLite,
+              providerOptions: SAFETY_OFF,
               prompt: insightPrompt({
                 nameA: fingerprints[0].name,
                 nameB: fingerprints[1].name,

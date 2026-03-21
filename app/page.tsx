@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, lazy, Suspense } from "react";
 import {
   RadarChart,
   PolarGrid,
@@ -16,10 +16,13 @@ import {
   Legend,
 } from "recharts";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { computeUniformityScore, diagnoseWriting } from "@/components/VoiceShape";
 
-import hemingway from "@/data/fallbacks/hemingway.json";
-import poe from "@/data/fallbacks/poe.json";
-import twain from "@/data/fallbacks/twain.json";
+const VoiceShape = lazy(() => import("@/components/VoiceShape"));
+
+import hemingway from "@/data/library/hemingway.json";
+import poe from "@/data/library/poe.json";
+import twain from "@/data/library/twain.json";
 
 // --- Types ---
 
@@ -79,7 +82,7 @@ interface CoachResponse {
 
 const library: FallbackAuthor[] = [hemingway, poe, twain] as FallbackAuthor[];
 
-type View = "home" | "compare" | "coaching" | "coached";
+type View = "home" | "diagnose" | "compare" | "coaching" | "coached";
 
 export default function Home() {
   const [view, setView] = useState<View>("home");
@@ -194,6 +197,45 @@ export default function Home() {
     },
     []
   );
+
+  const runDiagnose = useCallback(async () => {
+    if (textA.trim().length < 50) {
+      setError("Text needs at least 50 characters.");
+      return;
+    }
+    setLoading(true);
+    setError("");
+    const nA = nameA || "Your Writing";
+    setNameA(nA);
+
+    try {
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          texts: [{ text: textA, name: nA }],
+        }),
+      });
+
+      await consumeSSE(res, {
+        fingerprints: (data) => {
+          const results = data.results as { index: number; stats: StatFingerprint; radar: RadarPoint[] }[];
+          setFpA(results[0].stats);
+          setRadarA(results[0].radar);
+        },
+        voice: (data) => {
+          setVoiceA(data.reading as VoiceReading);
+        },
+        done: () => {
+          setView("diagnose");
+        },
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Analysis failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [textA, nameA]);
 
   const runCompare = useCallback(async () => {
     if (textA.trim().length < 50 || textB.trim().length < 50) {
@@ -452,21 +494,21 @@ export default function Home() {
           <div className="space-y-10">
             <div className="text-center space-y-4 pt-6">
               <h2 className="text-5xl font-bold tracking-tight leading-tight">
-                Every writer has a shape<br />you can see
+                Your writing has a shape
               </h2>
               <p className="text-zinc-400 max-w-2xl mx-auto text-lg leading-relaxed">
-                Capture any writing voice. Study it side by side with your own.
-                Then let the agent coach your prose toward the style you want.
+                Most writing is flat. Predictable sentence lengths. Safe punctuation.
+                No rhythm. Grimoire shows you the shape of any voice, diagnoses what&apos;s
+                dead, and coaches it to life.
               </p>
             </div>
 
             {/* How it works */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {[
-                { step: "01", title: "FINGERPRINT", desc: "11 statistical metrics extract the DNA of any writing voice. Instant, deterministic." },
-                { step: "02", title: "COMPARE", desc: "Overlaid radar charts + LLM voice readings reveal where two styles diverge." },
-                { step: "03", title: "COACH", desc: "3 rounds, 3 candidates per round. The agent rewrites toward the target, guided by metric-targeted corrections." },
-                { step: "04", title: "PROVE", desc: "A blind LLM judge reads both texts without labels. Same author? Statistical + perceptual proof." },
+                { step: "01", title: "DIAGNOSE", desc: "Paste any text. See its 3D voice shape instantly. Find what's flat, what's distinctive, what's dead." },
+                { step: "02", title: "TARGET", desc: "Pick a voice to aim for. Hemingway's angular edges. Poe's ornate spirals. Or paste your own target." },
+                { step: "03", title: "RESHAPE", desc: "The agent rewrites your prose in 3 rounds. Watch the shape morph toward the target. Prove it with a blind judge." },
               ].map((s) => (
                 <div key={s.step} className="border border-zinc-800/60 rounded-lg p-4 space-y-2">
                   <div className="text-xs text-zinc-600 font-[family-name:var(--font-geist-mono)]">{s.step}</div>
@@ -476,10 +518,11 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            {/* Single text input for diagnose */}
+            <div className="space-y-4">
               <TextInputPanel
-                label="YOUR WRITING"
-                sublabel="or any text to analyze"
+                label="PASTE YOUR TEXT"
+                sublabel="any prose: your draft, AI output, cover letter, essay"
                 name={nameA}
                 text={textA}
                 onNameChange={setNameA}
@@ -489,31 +532,200 @@ export default function Home() {
                 onLibrarySelect={(a) => loadFromLibrary(a, "A")}
                 loading={loading}
               />
-              <TextInputPanel
-                label="COMPARE AGAINST"
-                sublabel="a voice you want to study"
-                name={nameB}
-                text={textB}
-                onNameChange={setNameB}
-                onTextChange={setTextB}
-                onImageUpload={(f) => handleImageUpload("B", f)}
-                library={library}
-                onLibrarySelect={(a) => loadFromLibrary(a, "B")}
-                loading={loading}
-              />
             </div>
 
-            <button
-              onClick={runCompare}
-              disabled={
-                loading ||
-                textA.trim().length < 50 ||
-                textB.trim().length < 50
-              }
-              className="w-full py-4 bg-white text-black text-lg font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-            >
-              {loading ? "Reading..." : "Compare Voices"}
-            </button>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={runDiagnose}
+                disabled={loading || textA.trim().length < 50}
+                className="py-4 bg-white text-black text-lg font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              >
+                {loading ? "Reading..." : "Diagnose My Writing"}
+              </button>
+              <button
+                onClick={() => {
+                  if (textA.trim().length >= 50) {
+                    // Show compare panel
+                    setView("home");
+                    const el = document.getElementById("compare-panel");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                disabled={loading || textA.trim().length < 50}
+                className="py-4 border border-zinc-700 text-zinc-300 text-lg rounded-lg hover:border-zinc-500 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+              >
+                Compare Two Voices
+              </button>
+            </div>
+
+            {/* Expandable compare panel */}
+            <div id="compare-panel">
+              {textA.trim().length >= 50 && (
+                <div className="space-y-4 pt-4 border-t border-zinc-800">
+                  <TextInputPanel
+                    label="COMPARE AGAINST"
+                    sublabel="a voice you want to study or aim for"
+                    name={nameB}
+                    text={textB}
+                    onNameChange={setNameB}
+                    onTextChange={setTextB}
+                    onImageUpload={(f) => handleImageUpload("B", f)}
+                    library={library}
+                    onLibrarySelect={(a) => loadFromLibrary(a, "B")}
+                    loading={loading}
+                  />
+                  <button
+                    onClick={runCompare}
+                    disabled={loading || textB.trim().length < 50}
+                    className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Reading..." : "Compare Voices"}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========== DIAGNOSE ========== */}
+        {view === "diagnose" && fpA && radarA.length > 0 && (
+          <div className="space-y-8">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold">{nameA || "Your Writing"}</h2>
+              <p className="text-zinc-500 text-sm mt-1">voice shape + diagnosis</p>
+            </div>
+
+            {/* 3D Shape */}
+            <div className="border border-zinc-800 rounded-lg p-6">
+              <div className="max-w-md mx-auto" style={{ height: 400 }}>
+                <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-zinc-600">Loading shape...</div>}>
+                  <VoiceShape
+                    values={radarA.map((r) => r.value)}
+                    color="#22c55e"
+                    label={nameA || "Your Voice Shape"}
+                  />
+                </Suspense>
+              </div>
+            </div>
+
+            {/* Uniformity Score */}
+            {(() => {
+              const score = computeUniformityScore(radarA.map((r) => r.value));
+              const diagnosis = diagnoseWriting(radarA);
+              return (
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="border border-zinc-800 rounded-lg p-6">
+                    <div className="text-xs text-zinc-500 font-[family-name:var(--font-geist-mono)] mb-2">
+                      VOICE DISTINCTIVENESS
+                    </div>
+                    <div className="text-5xl font-bold font-[family-name:var(--font-geist-mono)]" style={{
+                      color: score > 60 ? "#22c55e" : score > 30 ? "#f59e0b" : "#ef4444",
+                    }}>
+                      {score}
+                    </div>
+                    <div className="text-sm text-zinc-400 mt-2">
+                      {score > 60
+                        ? "Distinctive voice. Angular, unpredictable. Hard to imitate."
+                        : score > 30
+                          ? "Moderate texture. Some signature patterns, some flat zones."
+                          : "Flat voice. Uniform rhythm, predictable patterns. Reads robotic or generic."}
+                    </div>
+                    <div className="mt-4 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{
+                          width: `${score}%`,
+                          background: score > 60 ? "#22c55e" : score > 30 ? "#f59e0b" : "#ef4444",
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-zinc-600 mt-1 font-[family-name:var(--font-geist-mono)]">
+                      <span>FLAT / ROBOTIC</span>
+                      <span>DISTINCTIVE / ALIVE</span>
+                    </div>
+                  </div>
+
+                  <div className="border border-zinc-800 rounded-lg p-6 space-y-4">
+                    {diagnosis.distinctive.length > 0 && (
+                      <div>
+                        <div className="text-xs text-green-400/60 font-[family-name:var(--font-geist-mono)] mb-1">
+                          DISTINCTIVE (your signature)
+                        </div>
+                        <div className="text-sm text-zinc-300">
+                          {diagnosis.distinctive.join(", ")}
+                        </div>
+                      </div>
+                    )}
+                    {diagnosis.flat.length > 0 && (
+                      <div>
+                        <div className="text-xs text-red-400/60 font-[family-name:var(--font-geist-mono)] mb-1">
+                          FLAT (needs texture)
+                        </div>
+                        <div className="text-sm text-zinc-300">
+                          {diagnosis.flat.join(", ")}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Voice Reading */}
+            {voiceA && <VoiceCard name={nameA || "Your Writing"} voice={voiceA} color="amber" />}
+
+            {/* Stat bars */}
+            <div className="border border-zinc-800 rounded-lg p-5">
+              <h3 className="text-sm font-semibold text-zinc-400 mb-4 font-[family-name:var(--font-geist-mono)]">
+                METRICS
+              </h3>
+              <MetricList fp={fpA} color="amber" />
+            </div>
+
+            {/* CTA: Pick a target voice */}
+            <div className="border border-zinc-800 rounded-lg p-6 text-center space-y-4">
+              <h3 className="text-lg font-semibold">
+                Now reshape it
+              </h3>
+              <p className="text-zinc-500 text-sm max-w-lg mx-auto">
+                Pick a target voice. The agent will rewrite your text toward that shape
+                in 3 rounds of selection pressure.
+              </p>
+              <div className="flex gap-3 justify-center flex-wrap">
+                {library.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => {
+                      loadFromLibrary(a, "B");
+                      setView("compare");
+                      // Auto-set fingerprints for comparison
+                      setFpB(a.stats);
+                      setRadarB(a.radar);
+                      setVoiceB(a.voice);
+                      setNameB(a.name);
+                      setTextB(a.sampleText);
+                    }}
+                    className="px-4 py-2 border border-zinc-700 rounded-lg hover:border-zinc-500 hover:text-white transition-colors text-zinc-400 text-sm font-[family-name:var(--font-geist-mono)]"
+                  >
+                    Reshape toward {a.name.split(" ").pop()}
+                  </button>
+                ))}
+              </div>
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    setView("home");
+                    setTimeout(() => {
+                      const el = document.getElementById("compare-panel");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
+                    }, 100);
+                  }}
+                  className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+                >
+                  or paste a custom target text
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1015,7 +1227,7 @@ export default function Home() {
       <footer className="border-t border-zinc-800 px-6 py-4">
         <div className="max-w-6xl mx-auto space-y-2">
           <div className="flex items-center justify-center gap-3 flex-wrap">
-            {["Next.js 16", "Vercel AI SDK", "Gemini 3.1 Pro", "Gemini 2.0 Flash", "Recharts", "Supabase", "Clerk", "Eleven Labs"].map((t) => (
+            {["Next.js 16", "Vercel AI SDK", "Gemini 3.1 Pro Preview", "Gemini 2.5 Flash Lite", "Three.js", "Supabase", "Clerk", "Eleven Labs"].map((t) => (
               <span key={t} className="px-2 py-0.5 text-[10px] border border-zinc-800 rounded text-zinc-600 font-[family-name:var(--font-geist-mono)]">
                 {t}
               </span>

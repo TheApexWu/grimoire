@@ -42,3 +42,6 @@ next-env.d.ts
 
 # corpus texts (too large for git)
 /corpus/
+
+# test scripts
+/scripts/

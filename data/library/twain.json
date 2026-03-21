@@ -3,50 +3,46 @@
   "name": "Mark Twain",
   "work": "Adventures of Huckleberry Finn",
   "stats": {
-    "monosyllableRatio": 0.7668661588683352,
-    "sentenceMean": 10.13,
-    "sentenceStd": 15.17,
-    "sentenceSkew": 3.49,
-    "commaRate": 0.413,
-    "semicolonRate": 0.099,
-    "periodRate": 0.934,
-    "lexicalDiversity": 0.692,
-    "conjunctionDensity": 0.567,
-    "paragraphMean": 4.92,
-    "paragraphStd": 3.02
+    "monosyllableRatio": 0.8160919540229885,
+    "sentenceMean": 19.33,
+    "sentenceStd": 12.33,
+    "sentenceSkew": 0.52,
+    "commaRate": 1.63,
+    "semicolonRate": 0.185,
+    "periodRate": 0.667,
+    "lexicalDiversity": 0.681,
+    "conjunctionDensity": 1.667,
+    "paragraphMean": 27,
+    "paragraphStd": 0
   },
   "radar": [
     {
       "label": "Monosyllable %",
-      "value": 0.5337323177366704
+      "value": 0.632183908045977
     },
     {
       "label": "Sentence Length",
-      "value": 0.11400000000000002
+      "value": 0.3184444444444444
     },
     {
       "label": "Sentence Variation",
-      "value": 0.47035714285714286
+      "value": 0.36892857142857144
     },
     {
       "label": "Comma Density",
-      "value": 0.08259999999999999
+      "value": 0.32599999999999996
     },
     {
       "label": "Semicolons",
-      "value": 0.099
+      "value": 0.185
     },
     {
       "label": "Lexical Diversity",
-      "value": 0.7127272727272725
+      "value": 0.6927272727272727
     },
     {
       "label": "Conjunctions",
-      "value": 0.18899999999999997
-    },
-    {
-      "label": "Paragraph Length",
-      "value": 0.27999999999999997
+      "value": 0.5556666666666666
     }
   ],
   "voice": {

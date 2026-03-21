@@ -1,5 +1,5 @@
-import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
+import { flash, SAFETY_OFF } from "@/lib/gemini";
 import { ocrPrompt } from "@/lib/prompts";
 
 export async function POST(request: Request) {
@@ -15,7 +15,8 @@ export async function POST(request: Request) {
   const mimeType = image.type || "image/jpeg";
 
   const { text } = await generateText({
-    model: google("gemini-2.5-flash"),
+    model: flash,
+    providerOptions: SAFETY_OFF,
     messages: [
       {
         role: "user",

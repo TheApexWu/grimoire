@@ -1,5 +1,5 @@
-import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
+import { proPreview, SAFETY_OFF } from "@/lib/gemini";
 import {
   computeStatFingerprint,
   compareFingerprints,
@@ -103,7 +103,8 @@ export async function POST(request: Request) {
                   });
 
             return generateText({
-              model: google("gemini-3.1-pro-preview"),
+              model: proPreview,
+              providerOptions: SAFETY_OFF,
               prompt,
               temperature: temp,
               maxOutputTokens: 4096,
@@ -166,11 +167,15 @@ export async function POST(request: Request) {
           previousBestDistance = best.distance;
         }
 
-        const final = allResults[allResults.length - 1];
+        // Pick the GLOBAL best across all rounds (not just the last one)
+        const final = allResults.reduce((best, r) =>
+          r.bestDistance < best.bestDistance ? r : best
+        );
         send("done", {
           mode,
           convergedEarly,
           roundsCompleted: allResults.length,
+          bestRound: final.round,
           finalText: final.bestText,
           finalDistance: final.bestDistance,
           finalFingerprint: final.bestFingerprint,

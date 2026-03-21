@@ -3,50 +3,46 @@
   "name": "Ernest Hemingway",
   "work": "The Sun Also Rises",
   "stats": {
-    "monosyllableRatio": 0.7740863787375415,
-    "sentenceMean": 11.84,
-    "sentenceStd": 10.94,
-    "sentenceSkew": 2.42,
-    "commaRate": 0.656,
-    "semicolonRate": 0.026,
-    "periodRate": 0.889,
-    "lexicalDiversity": 0.677,
-    "conjunctionDensity": 0.548,
-    "paragraphMean": 2.86,
-    "paragraphStd": 2.12
+    "monosyllableRatio": 0.8364661654135338,
+    "sentenceMean": 6.82,
+    "sentenceStd": 3.57,
+    "sentenceSkew": 0.57,
+    "commaRate": 0.397,
+    "semicolonRate": 0,
+    "periodRate": 0.897,
+    "lexicalDiversity": 0.624,
+    "conjunctionDensity": 0.154,
+    "paragraphMean": 78,
+    "paragraphStd": 0
   },
   "radar": [
     {
       "label": "Monosyllable %",
-      "value": 0.548172757475083
+      "value": 0.6729323308270676
     },
     {
       "label": "Sentence Length",
-      "value": 0.152
+      "value": 0.04044444444444445
     },
     {
       "label": "Sentence Variation",
-      "value": 0.3192857142857143
+      "value": 0.056071428571428564
     },
     {
       "label": "Comma Density",
-      "value": 0.1312
+      "value": 0.0794
     },
     {
       "label": "Semicolons",
-      "value": 0.026
+      "value": 0
     },
     {
       "label": "Lexical Diversity",
-      "value": 0.6854545454545455
+      "value": 0.5890909090909091
     },
     {
       "label": "Conjunctions",
-      "value": 0.18266666666666667
-    },
-    {
-      "label": "Paragraph Length",
-      "value": 0.13285714285714284
+      "value": 0.051333333333333335
     }
   ],
   "voice": {

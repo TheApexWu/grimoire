@@ -1,5 +1,5 @@
-import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
+import { flashLite, SAFETY_OFF } from "@/lib/gemini";
 import { judgePrompt } from "@/lib/prompts";
 
 function parseVerdict(raw: string): {
@@ -38,13 +38,15 @@ export async function POST(request: Request) {
   // Run judge twice with swapped positions to cancel position bias
   const [run1, run2] = await Promise.all([
     generateText({
-      model: google("gemini-2.5-flash-lite"),
+      model: flashLite,
+      providerOptions: SAFETY_OFF,
       prompt: judgePrompt({ textA: originalText, textB: generatedText }),
       temperature: 0.1,
       maxOutputTokens: 500,
     }),
     generateText({
-      model: google("gemini-2.5-flash-lite"),
+      model: flashLite,
+      providerOptions: SAFETY_OFF,
       prompt: judgePrompt({ textA: generatedText, textB: originalText }),
       temperature: 0.1,
       maxOutputTokens: 500,
